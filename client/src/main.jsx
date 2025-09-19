@@ -8,3 +8,11 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+// Remove splash screen once the app is mounted
+requestAnimationFrame(() => {
+  const el = document.getElementById('splash')
+  if (!el) return
+  el.classList.add('hide')
+  setTimeout(() => el.remove(), 400)
+})

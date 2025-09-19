@@ -2,14 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/src/assets/logo.png" />
+    <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <title>FootballRecruit</title>
+    <style>
+      /* Minimal splash styles so it appears before JS loads */
+      #splash { position: fixed; inset: 0; display: grid; place-items: center; background: #ffffff; z-index: 9999; transition: opacity .35s ease; }
+      #splash.hide { opacity: 0; pointer-events: none; }
+      #splash .splash-inner { text-align: center; }
+      #splash .splash-logo { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+      #splash .spinner { margin: 14px auto 0; width: 28px; height: 28px; border: 3px solid #f2f2f2; border-top-color: #ea580c; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
+    <!-- Splash screen (removed by main.jsx after mount) -->
+    <div id="splash" aria-hidden="true">
+      <div class="splash-inner">
+        <img class="splash-logo" src="/logo.png" alt="FootballRecruit" />
+        <div class="spinner"></div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
