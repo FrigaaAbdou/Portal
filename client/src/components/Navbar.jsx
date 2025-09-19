@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.png'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const panelRef = useRef(null)
+  const toggleRef = useRef(null)
 
   // Lock body scroll when the mobile menu is open
   useEffect(() => {
@@ -24,12 +26,28 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Close when clicking anywhere outside the drawer or toggle button
+  useEffect(() => {
+    if (!open) return
+    const onPointerDown = (e) => {
+      const panel = panelRef.current
+      const toggle = toggleRef.current
+      if (!panel || !toggle) return
+      const target = e.target
+      if (panel.contains(target) || toggle.contains(target)) return
+      setOpen(false)
+    }
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => window.removeEventListener('pointerdown', onPointerDown, true)
+  }, [open])
+
   return (
     <nav className="sticky top-0 z-30 border-b border-gray-200 bg-white/80 backdrop-blur relative">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Left: Logo + Brand */}
         <a href="#" className="flex items-center gap-3">
           <img src={logo} alt="FootballRecruit logo" className="h-8 w-8 rounded-full object-cover" />
+          <span className="text-lg font-semibold tracking-tight sm:hidden">Portal</span>
           <span className="hidden text-lg font-semibold tracking-tight sm:inline">FootballRecruit</span>
         </a>
 
@@ -40,6 +58,7 @@ export default function Navbar() {
           aria-label="Toggle navigation"
           aria-expanded={open}
           aria-controls="mobile-menu"
+          ref={toggleRef}
         >
           <svg
             className={`h-6 w-6 ${open ? 'hidden' : 'block'}`}
@@ -91,6 +110,7 @@ export default function Navbar() {
         }`}
         role="dialog"
         aria-modal="true"
+        ref={panelRef}
       >
         <div className="flex h-full flex-col px-4 py-4 sm:px-6">
           <div className="mb-3 text-right">
@@ -109,9 +129,11 @@ export default function Navbar() {
             <a href="#recruiters" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Recruiters</a>
             <a href="#about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</a>
           </nav>
-          <div className="mt-auto flex items-center gap-3 pt-4">
-            <button className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50">Log In</button>
-            <button className="flex-1 rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Sign Up</button>
+          <div className="mt-3 border-t border-gray-200 pt-3">
+            <div className="flex flex-col gap-2">
+              <button className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50">Log In</button>
+              <button className="w-full rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600">Sign Up</button>
+            </div>
           </div>
         </div>
       </div>
