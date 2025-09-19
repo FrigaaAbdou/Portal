@@ -2,6 +2,8 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import FeatureCard from './components/FeatureCard'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 function App() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
