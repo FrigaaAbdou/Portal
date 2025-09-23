@@ -1,4 +1,4 @@
-export default function Hero() {
+export default function Hero({ onJoinPlayer, onJoinRecruiter }) {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 md:py-24">
@@ -9,18 +9,20 @@ export default function Hero() {
           The premier platform connecting football players with college recruiters. Showcase your skills, discover opportunities, and take your game to the next level.
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-          <a
-            href="#join-player"
+          <button
+            type="button"
+            onClick={onJoinPlayer}
             className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 sm:px-5 sm:py-2.5"
           >
             Join as Player
-          </a>
-          <a
-            href="#join-recruiter"
+          </button>
+          <button
+            type="button"
+            onClick={onJoinRecruiter}
             className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 sm:px-5 sm:py-2.5"
           >
             Join as Recruiter
-          </a>
+          </button>
         </div>
       </div>
     </section>
