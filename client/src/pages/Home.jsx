@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Hero from '../components/Hero'
 import FeatureCard from '../components/FeatureCard'
 import Dialog from '../components/ui/Dialog'
@@ -7,13 +8,14 @@ const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <>
       <main>
         <Hero
-          onJoinRecruiter={() => setDialogOpen(true)}
-          onJoinPlayer={() => setDialogOpen(true)}
+          onJoinRecruiter={() => navigate('/signup/coach')}
+          onJoinPlayer={() => navigate('/signup/player')}
         />
 
         {/* Features */}
@@ -54,4 +56,3 @@ export default function Home() {
     </>
   )
 }
-
