@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Coach illustration">
+  <defs>
+    <linearGradient id="gc1" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#e0e7ff"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <linearGradient id="gc2" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#gc1)"/>
+  <rect x="60" y="80" width="220" height="120" rx="16" fill="#1f2937" opacity="0.9"/>
+  <rect x="320" y="80" width="420" height="120" rx="16" fill="#1f2937" opacity="0.5"/>
+  <circle cx="120" cy="320" r="70" fill="url(#gc2)" opacity="0.25"/>
+  <rect x="220" y="250" width="380" height="36" rx="18" fill="url(#gc2)" opacity="0.7"/>
+</svg>
+

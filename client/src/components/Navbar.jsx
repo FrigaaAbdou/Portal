@@ -93,12 +93,13 @@ export default function Navbar() {
           <a href="#players" className="hover:text-gray-900">Players</a>
           <a href="#recruiters" className="hover:text-gray-900">Recruiters</a>
           <a href="#about" className="hover:text-gray-900">About</a>
+          <Link to="/pricing" className="hover:text-gray-900">Pricing</Link>
         </div>
 
         {/* Right: Auth (desktop) */}
         <div className="hidden items-center gap-3 md:flex">
           <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-gray-900">Log In</Link>
-          <Link to="/login" className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600">Sign Up</Link>
+          <Link to="/signup" className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600">Sign Up</Link>
         </div>
       </div>
 
@@ -135,12 +136,13 @@ export default function Navbar() {
               <nav className="flex flex-col gap-2 text-sm font-medium text-gray-800">
                 <a href="#players" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Players</a>
                 <a href="#recruiters" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Recruiters</a>
-                <a href="#about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</a>
+            <a href="#about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</a>
+            <Link to="/pricing" className="rounded-md px-2 py-2 hover:bg-gray-50">Pricing</Link>
               </nav>
               <div className="mt-3 border-t border-gray-200 pt-3">
                 <div className="flex flex-col gap-2">
                   <Link to="/login" className="w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-900 hover:bg-gray-50">Log In</Link>
-                  <Link to="/login" className="w-full rounded-md bg-orange-500 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-orange-600">Sign Up</Link>
+                  <Link to="/signup" className="w-full rounded-md bg-orange-500 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-orange-600">Sign Up</Link>
                 </div>
               </div>
             </div>
