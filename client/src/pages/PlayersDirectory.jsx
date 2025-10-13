@@ -1,8 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
+import { Link } from 'react-router-dom'
 import AccountLayout from '../components/layout/AccountLayout'
 import { searchPlayers, fetchFavorites, saveFavorite, removeFavorite } from '../lib/api'
+import { soccerPositions } from '../lib/positions'
+
+const INITIAL_FILTERS = {
+  search: '',
+  positions: [],
+  division: '',
+  location: '',
+  verificationStatus: [],
+  gpaMin: '',
+  gpaMax: '',
+  budgetMin: '',
+  budgetMax: '',
+  page: 1,
+  limit: 15,
+}
 
 function initialsFrom(text = '') {
   const parts = String(text).trim().split(/\s+/)
@@ -14,37 +30,23 @@ function initialsFrom(text = '') {
 function Avatar({ player }) {
   const initials = useMemo(() => initialsFrom(player.fullName || 'Player'), [player.fullName])
   if (player.avatarUrl) {
-    return <img src={player.avatarUrl} alt={player.fullName || 'Player'} className="h-14 w-14 rounded-full object-cover shadow-sm" />
+    return <img src={player.avatarUrl} alt={player.fullName || 'Player'} className="h-12 w-12 rounded-full object-cover shadow-sm" />
   }
   return (
-    <div className="grid h-14 w-14 place-items-center rounded-full bg-orange-500 text-base font-semibold text-white shadow-sm">
+    <div className="grid h-12 w-12 place-items-center rounded-full bg-orange-500 text-sm font-semibold text-white shadow-sm">
       {initials}
     </div>
   )
 }
 
-function Indicator({ label, value, helper, variant = 'standard' }) {
-  const variants = {
-    standard: 'min-w-[120px] px-3 py-2 text-sm',
-    budget: 'min-w-[160px] px-4 py-3 text-base',
-  }
-  const applied = variants[variant] || variants.standard
-  return (
-    <div className={`rounded-xl border border-gray-200 bg-gray-50 text-left ${applied}`}>
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">{label}</div>
-      <div className="mt-1 font-semibold text-gray-900">{value}</div>
-      {helper && <p className="mt-1 text-[11px] text-gray-500">{helper}</p>}
-    </div>
-  )
-}
-
-function StatIndicator({ label, value }) {
-  return (
-    <div className="min-w-[60px] rounded-xl border border-orange-100 bg-orange-50/70 px-2.5 py-1.5 text-center">
-      <div className="text-[9px] font-semibold uppercase tracking-wide text-orange-600">{label}</div>
-      <div className="mt-1 text-base font-bold text-gray-900">{value ?? 0}</div>
-    </div>
-  )
+function statEntries(stats = {}) {
+  return [
+    ['G', 'Games', stats.games],
+    ['S', 'Starts', stats.gamesStarted],
+    ['GLS', 'Goals', stats.goals],
+    ['AST', 'Assists', stats.assists],
+    ['PTS', 'Points', stats.points],
+  ]
 }
 
 function formatBudget(budget) {
@@ -62,18 +64,8 @@ export default function PlayersDirectory() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [favorites, setFavorites] = useState({})
-  const [filters, setFilters] = useState({
-    search: '',
-    positions: [],
-    division: '',
-    location: '',
-    verificationStatus: [],
-    gpaMin: '',
-    gpaMax: '',
-    budgetMin: '',
-    budgetMax: '',
-    page: 1,
-  })
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
+  const [filters, setFilters] = useState({ ...INITIAL_FILTERS })
 
   function updateFilters(updates) {
     setFilters((prev) => ({ ...prev, page: 1, ...updates }))
@@ -89,14 +81,14 @@ export default function PlayersDirectory() {
         if (!active) return
         if (response?.data) {
           setPlayers(response.data)
-          setMeta(response.meta || { page: 1, limit: filters.limit || 20, total: response.data.length, totalPages: 1 })
+          setMeta(response.meta || { page: 1, limit: filters.limit || 15, total: response.data.length, totalPages: 1 })
         } else if (Array.isArray(response)) {
           // fallback to legacy listPlayers response shape
           setPlayers(response)
-          setMeta({ page: 1, limit: response.length, total: response.length, totalPages: 1 })
+          setMeta({ page: 1, limit: filters.limit || response.length, total: response.length, totalPages: 1 })
         } else {
           setPlayers([])
-          setMeta({ page: 1, limit: 20, total: 0, totalPages: 1 })
+          setMeta({ page: 1, limit: filters.limit || 15, total: 0, totalPages: 1 })
         }
       } catch (err) {
         if (active) setError(err?.message || 'Failed to load players')
@@ -128,8 +120,24 @@ export default function PlayersDirectory() {
   }, [])
 
   const isFavorited = (playerId) => Boolean(favorites[playerId])
+  const favoriteCount = useMemo(() => Object.keys(favorites).length, [favorites])
+  const displayedPlayers = useMemo(() => {
+    if (!favoritesOnly) return players
+    return players.filter((player) => {
+      const key = player?._id || player?.user
+      if (!key) return false
+      return Boolean(favorites[key])
+    })
+  }, [favoritesOnly, favorites, players])
+  const hasPlayers = displayedPlayers.length > 0
+  const emptyMessage = favoritesOnly
+    ? (favoriteCount === 0
+      ? "You haven't added any favorites yet."
+      : 'No favorites match your current filters.')
+    : 'No player profiles found yet.'
 
   async function toggleFavorite(playerId) {
+    if (!playerId) return
     try {
       if (isFavorited(playerId)) {
         await removeFavorite(playerId)
@@ -150,13 +158,21 @@ export default function PlayersDirectory() {
     }
   }
 
+  const Spinner = () => (
+    <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+      <svg className="h-5 w-5 animate-spin text-orange-500" viewBox="0 0 24 24" fill="none">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      </svg>
+      Loading players…
+    </div>
+  )
+
   return (
     <AccountLayout title="Player Directory">
-      <div className="rounded-3xl border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-emerald-50 px-6 py-7 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-900 md:text-2xl">Discover verified talent</h2>
-        <p className="mt-2 text-sm text-gray-600 md:max-w-2xl">
-          Browse the latest player profiles and refine by position, academics, budget, or geography to build your recruiting playlist.
-        </p>
+      <div className="rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900">Player directory</h2>
+        <p className="mt-1 text-sm text-gray-600">Filter for fit, capture favorites, and export insights faster.</p>
       </div>
 
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -206,24 +222,24 @@ export default function PlayersDirectory() {
           <div>
             <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Positions</label>
             <div className="mt-2 flex flex-wrap gap-2">
-              {['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K/P'].map((pos) => {
-                const active = filters.positions.includes(pos)
+              {Object.values(soccerPositions).flat().map(({ code }) => {
+                const active = filters.positions.includes(code)
                 return (
                   <button
                     type="button"
-                    key={pos}
+                    key={code}
                     onClick={() => {
                       if (active) {
-                        updateFilters({ positions: filters.positions.filter((p) => p !== pos) })
+                        updateFilters({ positions: filters.positions.filter((p) => p !== code) })
                       } else {
-                        updateFilters({ positions: [...filters.positions, pos] })
+                        updateFilters({ positions: [...filters.positions, code] })
                       }
                     }}
                     className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
                       active ? 'border-orange-500 bg-orange-500 text-white' : 'border-gray-300 bg-white text-gray-600 hover:border-orange-300 hover:text-orange-500'
                     }`}
                   >
-                    {pos}
+                    {code}
                   </button>
                 )
               })}
@@ -306,19 +322,19 @@ export default function PlayersDirectory() {
           })}
           <button
             type="button"
+            onClick={() => setFavoritesOnly((prev) => !prev)}
+            className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition ${
+              favoritesOnly
+                ? 'border-orange-500 bg-orange-500 text-white'
+                : 'border-gray-300 bg-white text-gray-700 hover:border-orange-300 hover:text-orange-500'
+            }`}
+          >
+            Favorites only{favoriteCount ? ` (${favoriteCount})` : ''}
+          </button>
+          <button
+            type="button"
             onClick={() =>
-              setFilters({
-                search: '',
-                positions: [],
-                division: '',
-                location: '',
-                verificationStatus: [],
-                gpaMin: '',
-                gpaMax: '',
-                budgetMin: '',
-                budgetMax: '',
-                page: 1,
-              })
+              setFilters({ ...INITIAL_FILTERS })
             }
             className="ml-auto rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:border-gray-400 hover:bg-gray-50"
           >
@@ -329,8 +345,8 @@ export default function PlayersDirectory() {
 
 
       {loading && (
-        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
-          Loading players…
+        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6">
+          <Spinner />
         </div>
       )}
 
@@ -340,70 +356,112 @@ export default function PlayersDirectory() {
         </div>
       )}
 
-      {!loading && !error && players.length === 0 && (
+      {!loading && !error && !hasPlayers && (
         <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
-          No player profiles found yet.
+          {emptyMessage}
         </div>
       )}
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="grid grid-cols-[2fr,1.4fr,1.4fr,2.6fr] items-center gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
-          <span>Player</span>
-          <span>Academics</span>
-          <span>Budget</span>
-          <span>Season stats</span>
-        </div>
-        <div className="divide-y divide-gray-100">
-          {players.map((player) => {
-            const stats = player.stats || {}
-            return (
-              <div key={player._id || player.user} className="grid grid-cols-[2fr,1.4fr,1.4fr,2.6fr] items-center gap-4 px-6 py-5 transition hover:bg-orange-50/60">
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => toggleFavorite(player._id)}
-                    className={`rounded-full border px-2 py-2 text-orange-500 transition hover:bg-orange-50 ${
-                      isFavorited(player._id) ? 'border-orange-400 bg-orange-50' : 'border-gray-300 text-gray-400'
-                    }`}
-                    aria-label={isFavorited(player._id) ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    {isFavorited(player._id) ? <HeartSolid className="h-5 w-5" /> : <HeartOutline className="h-5 w-5" />}
-                  </button>
-                  <Avatar player={player} />
-                  <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold text-gray-900">{player.fullName || 'Unnamed Player'}</h3>
-                    <p className="truncate text-xs text-gray-500">{player.school || 'School not provided'}</p>
-                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-medium text-gray-500">
-                      {Array.isArray(player.positions) && player.positions.length > 0
-                        ? player.positions.map((pos) => (
-                          <span key={pos} className="rounded-full bg-orange-100 px-2 py-0.5 text-orange-700">{pos}</span>
-                        ))
-                        : <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-500">No position</span>}
+      {hasPlayers && (
+        <div className="mt-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <table className="min-w-full table-fixed">
+          <colgroup>
+            <col className="w-[28%]" />
+            <col className="w-[18%]" />
+            <col className="w-[10%]" />
+            <col className="w-[6%]" />
+            <col className="w-[12%]" />
+            <col className="w-[28%]" />
+          </colgroup>
+          <thead>
+            <tr className="bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+              <th scope="col" className="px-4 py-3 text-left">Player</th>
+              <th scope="col" className="px-4 py-3 text-left">School / Team</th>
+              <th scope="col" className="px-4 py-3 text-left">Division</th>
+              <th scope="col" className="px-4 py-3 text-left">GPA</th>
+              <th scope="col" className="px-4 py-3 text-left">Budget</th>
+              <th scope="col" className="px-4 py-3 text-left">Stats</th>
+            </tr>
+          </thead>
+          <tbody className="text-sm text-gray-700">
+            {displayedPlayers.map((player) => {
+              const stats = player.stats || {}
+              const playerId = player._id || player.user
+              const favorited = isFavorited(playerId)
+              const positions = Array.isArray(player.positions) && player.positions.length
+                ? player.positions.join(', ')
+                : '—'
+              const location =
+                [player.city, player.state].filter(Boolean).join(', ') ||
+                player.country ||
+                '—'
+              return (
+                <tr
+                  key={playerId || player._id || player.user}
+                  className="border-b border-gray-100 transition hover:bg-orange-50/60"
+                >
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleFavorite(playerId)}
+                        className={`rounded-md border px-2 py-1.5 text-orange-500 transition ${
+                          favorited ? 'border-orange-400 bg-orange-50' : 'border-gray-300 text-gray-400 hover:border-orange-300'
+                        }`}
+                        aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {favorited ? <HeartSolid className="h-4 w-4" /> : <HeartOutline className="h-4 w-4" />}
+                      </button>
+                      <Avatar player={player} />
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-gray-900">
+                          <Link to={`/players/${playerId}`} className="hover:text-orange-600">{player.fullName || 'Unnamed Player'}</Link>
+                        </div>
+                        <div className="truncate text-xs text-gray-500">{positions}</div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-600">
-                  <Indicator label="GPA" value={player.gpa || '—'} />
-                  <Indicator label="Division" value={player.division || '—'} />
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-600">
-                  <Indicator label="Budget" value={formatBudget(player.budget)} helper={player.preferredLocation || 'Anywhere'} variant="budget" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatIndicator label="Games" value={stats.games} />
-                  <StatIndicator label="Starts" value={stats.gamesStarted} />
-                  <StatIndicator label="Goals" value={stats.goals} />
-                  <StatIndicator label="Assists" value={stats.assists} />
-                  <StatIndicator label="Points" value={stats.points} />
-                </div>
-              </div>
-            )
-          })}
-       </div>
-     </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <div className="truncate text-sm font-medium text-gray-800">
+                      {player.school || '—'}
+                    </div>
+                    <div className="truncate text-xs text-gray-500">{location}</div>
+                  </td>
+                  <td className="px-4 py-3 align-middle text-sm font-medium text-gray-800">
+                    {player.division || '—'}
+                  </td>
+                  <td className="px-4 py-3 align-middle text-sm font-medium text-gray-800">
+                    {player.gpa ? Number(player.gpa).toFixed(2) : '—'}
+                  </td>
+                  <td className="px-4 py-3 align-middle text-sm font-medium text-gray-800">
+                    <div>{formatBudget(player.budget)}</div>
+                    {player.preferredLocation && (
+                      <div className="text-xs text-gray-500">Pref: {player.preferredLocation}</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 align-middle text-sm font-medium text-gray-800">
+                    <div className="flex flex-wrap gap-0.5">
+                      {statEntries(stats).map(([code, label, value]) => (
+                        <div
+                          key={code}
+                          className="flex h-[38px] w-[46px] flex-col items-center justify-center rounded-lg border border-orange-100 bg-orange-50 text-center shadow-sm"
+                        >
+                          <span className="text-[8px] font-semibold uppercase tracking-wide text-orange-500">{code}</span>
+                          <span className="mt-0.5 text-xs font-bold text-gray-900">{value ?? 0}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Pagination summary */}
-      {!loading && !error && players.length > 0 && (
+      {!favoritesOnly && !loading && !error && hasPlayers && (
         <div className="mt-6 flex flex-col items-center justify-between gap-3 text-xs text-gray-500 sm:flex-row">
           <span>
             Showing {(meta.page - 1) * meta.limit + 1}
@@ -413,7 +471,7 @@ export default function PlayersDirectory() {
           <div className="flex gap-2">
             <button
               type="button"
-            onClick={() => setFilters((prev) => ({ ...prev, page: Math.max((prev.page || 1) - 1, 1) }))}
+              onClick={() => setFilters((prev) => ({ ...prev, page: Math.max((prev.page || 1) - 1, 1) }))}
               disabled={meta.page <= 1 || loading}
               className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -421,7 +479,7 @@ export default function PlayersDirectory() {
             </button>
             <button
               type="button"
-            onClick={() => setFilters((prev) => ({ ...prev, page: Math.min((prev.page || 1) + 1, meta.totalPages || 1) }))}
+              onClick={() => setFilters((prev) => ({ ...prev, page: Math.min((prev.page || 1) + 1, meta.totalPages || 1) }))}
               disabled={meta.page >= meta.totalPages || loading}
               className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >

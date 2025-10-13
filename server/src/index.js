@@ -32,8 +32,13 @@ if (MONGODB_URI) {
   console.log('No MONGODB_URI provided — skipping DB connection');
 }
 
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/players', require('./routes/players'));
+app.use('/api/coaches', require('./routes/coaches'));
+app.use('/api/favorites', require('./routes/favorites'));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`API listening on http://localhost:${PORT}`);
 });
-

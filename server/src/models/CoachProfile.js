@@ -12,8 +12,10 @@ const CoachProfileSchema = new mongoose.Schema(
     website: { type: String, trim: true },
     roleTitle: { type: String, trim: true },
     programName: { type: String, trim: true },
+    programNameNormalized: { type: String, trim: true, lowercase: true, index: true },
     programCity: { type: String, trim: true },
     programState: { type: String, trim: true },
+    bio: { type: String, trim: true, maxlength: 2000 },
     recruitingBudgetRange: { type: String, trim: true },
     priorityPositions: [{ type: String, trim: true }],
     minGpa: { type: String, trim: true },
@@ -39,14 +41,9 @@ const CoachProfileSchema = new mongoose.Schema(
     uniProgram: { type: String, trim: true },
     division: { type: String, enum: ['NCAA D1', 'NCAA D2', 'NCAA D3', 'NAIA', ''], default: '' },
     conference: { type: String, trim: true },
-    position: { type: String, trim: true }, // Head Coach | Assistant Coach | Recruiter
+    position: { type: String, trim: true }, // legacy field (optional)
     uniAddress: { type: String, trim: true },
     uniPhone: { type: String, trim: true },
-
-    // Preferences (free-form for MVP)
-    priorityPositions: { type: String, trim: true },
-    minGpa: { type: String, trim: true },
-    otherCriteria: { type: String, trim: true },
   },
   { timestamps: true }
 );

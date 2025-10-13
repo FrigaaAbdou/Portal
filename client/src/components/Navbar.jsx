@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
+import { getToken } from '../lib/api'
 import logo from '../assets/logo.png'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
   const panelRef = useRef(null)
   const toggleRef = useRef(null)
+  const avatarRef = useRef(null)
   const location = useLocation()
+  const authed = Boolean(getToken())
 
   // Lock body scroll when the mobile menu is open
   useEffect(() => {
@@ -23,6 +27,7 @@ export default function Navbar() {
   // Close menu when route changes
   useEffect(() => {
     setOpen(false)
+    setAvatarOpen(false)
   }, [location.pathname])
 
   // Close on Escape key
@@ -48,6 +53,19 @@ export default function Navbar() {
     window.addEventListener('pointerdown', onPointerDown, true)
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [open])
+
+  // Close avatar dropdown on outside click
+  useEffect(() => {
+    if (!avatarOpen) return
+    const onPointerDown = (e) => {
+      const el = avatarRef.current
+      if (!el) return
+      if (el.contains(e.target)) return
+      setAvatarOpen(false)
+    }
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => window.removeEventListener('pointerdown', onPointerDown, true)
+  }, [avatarOpen])
 
   return (
     <nav className="sticky top-0 z-30 border-b border-gray-200 bg-white/80 backdrop-blur">
@@ -98,8 +116,31 @@ export default function Navbar() {
 
         {/* Right: Auth (desktop) */}
         <div className="hidden items-center gap-3 md:flex">
-          <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-gray-900">Log In</Link>
-          <Link to="/signup" className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600">Sign Up</Link>
+          {authed ? (
+            <div className="relative" ref={avatarRef}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={avatarOpen}
+                onClick={() => setAvatarOpen((v) => !v)}
+                className="h-8 w-8 rounded-full bg-orange-500 text-white grid place-items-center text-sm font-semibold"
+              >
+                U
+              </button>
+              {avatarOpen && (
+                <div className="absolute right-0 mt-2 w-44 rounded-md border border-gray-200 bg-white p-1 text-sm shadow-md">
+                  <Link to="/profile" onClick={() => setAvatarOpen(false)} className="block rounded px-3 py-2 text-gray-800 hover:bg-gray-50">Profile</Link>
+                  <Link to="/settings" onClick={() => setAvatarOpen(false)} className="block rounded px-3 py-2 text-gray-800 hover:bg-gray-50">Settings</Link>
+                  <Link to="/dashboard" onClick={() => setAvatarOpen(false)} className="block rounded px-3 py-2 text-gray-800 hover:bg-gray-50">Dashboard</Link>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-gray-900">Log In</Link>
+              <Link to="/signup" className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600">Sign Up</Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -136,14 +177,26 @@ export default function Navbar() {
               <nav className="flex flex-col gap-2 text-sm font-medium text-gray-800">
                 <a href="#players" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Players</a>
                 <a href="#recruiters" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Recruiters</a>
-            <a href="#about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</a>
-            <Link to="/pricing" className="rounded-md px-2 py-2 hover:bg-gray-50">Pricing</Link>
+                <a href="#about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</a>
+                <Link to="/pricing" className="rounded-md px-2 py-2 hover:bg-gray-50">Pricing</Link>
               </nav>
               <div className="mt-3 border-t border-gray-200 pt-3">
-                <div className="flex flex-col gap-2">
-                  <Link to="/login" className="w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-900 hover:bg-gray-50">Log In</Link>
-                  <Link to="/signup" className="w-full rounded-md bg-orange-500 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-orange-600">Sign Up</Link>
-                </div>
+                {authed ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-orange-500 text-white grid place-items-center text-sm font-semibold">U</div>
+                      <span className="text-sm text-gray-800">Account</span>
+                    </div>
+                    <Link to="/dashboard" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-left text-sm hover:bg-gray-50">Dashboard</Link>
+                    <Link to="/profile" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-left text-sm hover:bg-gray-50">Profile</Link>
+                    <Link to="/settings" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-left text-sm hover:bg-gray-50">Settings</Link>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <Link to="/login" className="w-full rounded-md border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-900 hover:bg-gray-50">Log In</Link>
+                    <Link to="/signup" className="w-full rounded-md bg-orange-500 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-orange-600">Sign Up</Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

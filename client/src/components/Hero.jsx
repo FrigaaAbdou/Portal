@@ -1,14 +1,15 @@
 export default function Hero({ onJoinPlayer, onJoinRecruiter }) {
   return (
-    <section className="bg-white">
-      <div className="mx-auto max-w-5xl px-4 py-12 text-center sm:px-6 md:py-20">
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl md:text-6xl md:leading-tight">
+    <section className="relative overflow-hidden bg-gray-900 text-white">
+      <BackgroundImage />
+      <div className="relative mx-auto flex max-w-5xl flex-col items-center px-4 py-14 text-center sm:px-6 md:py-24 md:text-left">
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-6xl md:leading-tight">
           Connect Talent with Opportunity
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-gray-600 sm:mt-4 sm:text-base md:text-lg">
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-gray-100 sm:mt-4 sm:text-base md:text-lg">
           The premier platform connecting football players with college recruiters. Showcase your skills, discover opportunities, and take your game to the next level.
         </p>
-        <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:mt-7 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mt-6 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-7 sm:flex-row sm:items-center sm:gap-4 md:w-auto">
           <button
             type="button"
             onClick={onJoinPlayer}
@@ -19,12 +20,25 @@ export default function Hero({ onJoinPlayer, onJoinRecruiter }) {
           <button
             type="button"
             onClick={onJoinRecruiter}
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 sm:w-auto sm:px-5 sm:py-2.5"
+            className="w-full rounded-md border border-white/60 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur hover:bg-white/20 sm:w-auto sm:px-5 sm:py-2.5"
           >
             Join as Recruiter
           </button>
         </div>
       </div>
     </section>
+  )
+}
+
+function BackgroundImage() {
+  return (
+    <div aria-hidden className="absolute inset-0">
+      <img
+        src={new URL('../assets/hero.png', import.meta.url).href}
+        alt=""
+        className="h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gray-900/50" />
+    </div>
   )
 }

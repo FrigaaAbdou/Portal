@@ -15,7 +15,7 @@ import { getMyPlayerProfile, getMyCoachProfile, savePlayerProfile, saveCoachProf
 
 function SectionCard({ title, subtitle, icon: Icon, children, canEdit = false, onEdit, className = '' }) {
   return (
-    <div className={`group relative rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-[1px] hover:border-orange-200 hover:shadow-md ${className}`}>
+    <div className={`group relative flex flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-[1px] hover:border-orange-200 hover:shadow-md ${className}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           {Icon && (
@@ -42,7 +42,7 @@ function SectionCard({ title, subtitle, icon: Icon, children, canEdit = false, o
           </button>
         )}
       </div>
-      <div className="mt-4 text-sm text-gray-800">{children}</div>
+      <div className="mt-4 flex-1 text-sm text-gray-800">{children}</div>
     </div>
   )
 }
@@ -1340,92 +1340,96 @@ export default function Profile() {
                 ))}
               </div>
             ) : (
-              <>
-                {rosterPreview.length === 0 ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-5 text-sm text-amber-800">
-                    <p className="font-semibold">No players linked yet</p>
-                    <p className="mt-1">
-                      Ask your athletes to list <span className="font-semibold">{c.jucoProgram || 'your JUCO program'}</span> when they create their Portal profile and they’ll appear here automatically.
-                    </p>
-                  </div>
-                ) : (
-                  <ul className="space-y-3">
-                    {rosterPreview.map((player) => {
-                      const updated = player.updatedAt ? new Date(player.updatedAt) : null
-                      const positions = Array.isArray(player.positions) ? player.positions.join(', ') : ''
-                      const noteAdded = Boolean(player.jucoCoachNote)
-                      return (
-                        <li key={player._id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3">
-                          <div className="grid h-11 w-11 flex-none place-items-center rounded-full bg-orange-500 text-sm font-semibold text-white">
-                            {initialsFrom(player.fullName || player.school || 'Player')}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-gray-900">{player.fullName || player.school || 'Player'}</p>
-                            <p className="mt-0.5 truncate text-xs text-gray-500">
-                              {positions || 'No positions listed'}
-                              {player.gpa ? ` · GPA ${player.gpa}` : ''}
-                              {updated ? ` · Updated ${updated.toLocaleDateString()}` : ''}
-                            </p>
-                          </div>
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
-                              noteAdded ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
-                            }`}
-                          >
-                            {noteAdded ? 'Note added' : 'No note'}
-                          </span>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                )}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-                  <span>Roster updates sync whenever players list your JUCO program.</span>
-                  <button
-                    type="button"
-                    onClick={() => loadRosterPreview(rosterMeta.page)}
-                    className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
-                  >
-                    Refresh
-                  </button>
-                </div>
-                {rosterMeta.totalPages > 1 && (
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-                    <div>
-                      Page {rosterMeta.page} of {rosterMeta.totalPages}
+              <div className="flex h-full flex-col">
+                <div className="flex-1">
+                  {rosterPreview.length === 0 ? (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-5 text-sm text-amber-800">
+                      <p className="font-semibold">No players linked yet</p>
+                      <p className="mt-1">
+                        Ask your athletes to list <span className="font-semibold">{c.jucoProgram || 'your JUCO program'}</span> when they create their Portal profile and they’ll appear here automatically.
+                      </p>
                     </div>
+                  ) : (
+                    <ul className="space-y-3">
+                      {rosterPreview.map((player) => {
+                        const updated = player.updatedAt ? new Date(player.updatedAt) : null
+                        const positions = Array.isArray(player.positions) ? player.positions.join(', ') : ''
+                        const noteAdded = Boolean(player.jucoCoachNote)
+                        return (
+                        <li key={player._id} className="flex items-center gap-3 rounded-xl border border-orange-100 bg-gray-50 px-3 py-3 transition hover:border-orange-200">
+                            <div className="grid h-11 w-11 flex-none place-items-center rounded-full bg-orange-500 text-sm font-semibold text-white">
+                              {initialsFrom(player.fullName || player.school || 'Player')}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold text-gray-900">{player.fullName || player.school || 'Player'}</p>
+                              <p className="mt-0.5 truncate text-xs text-gray-500">
+                                {positions || 'No positions listed'}
+                                {player.gpa ? ` · GPA ${player.gpa}` : ''}
+                                {updated ? ` · Updated ${updated.toLocaleDateString()}` : ''}
+                              </p>
+                            </div>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                noteAdded ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
+                              }`}
+                            >
+                              {noteAdded ? 'Note added' : 'No note'}
+                            </span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )}
+                </div>
+                <div className="mt-auto space-y-3 pt-4 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span>Roster updates sync whenever players list your JUCO program.</span>
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => loadRosterPreview(rosterMeta.page - 1)}
-                        disabled={rosterMeta.page <= 1 || rosterLoading}
-                        className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => loadRosterPreview(rosterMeta.page + 1)}
-                        disabled={rosterMeta.page >= rosterMeta.totalPages || rosterLoading}
-                        className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        Next
-                      </button>
+                      {rosterMeta.totalPages > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => loadRosterPreview(rosterMeta.page - 1)}
+                            disabled={rosterMeta.page <= 1 || rosterLoading}
+                            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Previous
+                          </button>
+                          <span>
+                            Page {rosterMeta.page} of {rosterMeta.totalPages}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => loadRosterPreview(rosterMeta.page + 1)}
+                            disabled={rosterMeta.page >= rosterMeta.totalPages || rosterLoading}
+                            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Next
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-                )}
-                <div className="mt-3 flex justify-end">
-                  <Link
-                    to="/players/my"
-                    className="inline-flex items-center gap-1 rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-600"
-                  >
-                    View all players
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => loadRosterPreview(rosterMeta.page)}
+                      className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+                    >
+                      Refresh
+                    </button>
+                    <Link
+                      to="/players/my"
+                      className="inline-flex items-center gap-1 rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-600"
+                    >
+                      View all players
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </SectionCard>
         )}
