@@ -111,21 +111,51 @@ export default function SignupPlayer() {
   const validators = useMemo(() => ({
     account: () => {
       const { email, password, confirmPassword, acceptTerms } = data
-      const ok = email.includes('@') && password.length >= 6 && confirmPassword === password && acceptTerms
-      return ok
+      return email.includes('@') && password.length >= 6 && confirmPassword === password && acceptTerms
     },
     personal: () => {
-      const { fullName, dob, country } = data
-      return fullName.trim().length >= 2 && !!dob && !!country
+      const {
+        fullName,
+        dob,
+        country,
+        city,
+        state,
+        heightFeet,
+        heightInches,
+        weightLbs,
+      } = data
+      return [
+        fullName.trim().length >= 2,
+        Boolean(dob),
+        Boolean(country),
+        Boolean(city?.trim()),
+        Boolean(state?.trim()),
+        String(heightFeet).trim() !== '',
+        String(heightInches).trim() !== '',
+        String(weightLbs).trim() !== '',
+      ].every(Boolean)
     },
     background: () => {
-      const { school, positions } = data
-      return !!school && Array.isArray(positions) && positions.length > 0
+      const { school, positions, gpa, highlightUrl1, highlightUrl2 } = data
+      return [
+        Boolean(school?.trim()),
+        Array.isArray(positions) && positions.length > 0,
+        Boolean(gpa?.trim()),
+        Boolean(highlightUrl1?.trim()),
+        Boolean(highlightUrl2?.trim()),
+      ].every(Boolean)
     },
-    stats: () => true,
+    stats: () => {
+      const { games, gamesStarted, goals, assists, points } = data
+      return [games, gamesStarted, goals, assists, points].every((value) => String(value).trim() !== '')
+    },
     preferences: () => {
-      const { division } = data
-      return !!division
+      const { division, budget, preferredLocation } = data
+      return [
+        Boolean(String(division).trim()),
+        String(budget).trim() !== '',
+        Boolean(String(preferredLocation).trim()),
+      ].every(Boolean)
     },
     review: () => true,
   }), [data])
@@ -169,9 +199,9 @@ export default function SignupPlayer() {
         city: data.city,
         state: data.state,
         country: data.country,
-        heightFeet: Number(data.heightFeet) || undefined,
-        heightInches: Number(data.heightInches) || undefined,
-        weightLbs: Number(data.weightLbs) || undefined,
+        heightFeet: data.heightFeet !== '' ? Number(data.heightFeet) : undefined,
+        heightInches: data.heightInches !== '' ? Number(data.heightInches) : undefined,
+        weightLbs: data.weightLbs !== '' ? Number(data.weightLbs) : undefined,
         school: data.school,
         gpa: data.gpa,
         positions: data.positions || [],
@@ -183,7 +213,7 @@ export default function SignupPlayer() {
         assists: Number(data.assists) || 0,
         points: Number(data.points) || 0,
         division: data.division,
-        budget: Number(data.budget) || undefined,
+        budget: data.budget !== '' ? Number(data.budget) : undefined,
         preferredLocation: data.preferredLocation,
       }
       await savePlayerProfile(payload)
@@ -281,7 +311,7 @@ export default function SignupPlayer() {
               </Field>
               <div className="sm:col-span-2">
                 <label className="inline-flex items-center gap-2 text-sm text-gray-700">
-                  <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-600" checked={data.acceptTerms} onChange={(e)=>update({acceptTerms:e.target.checked})} />
+                  <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-600" checked={data.acceptTerms} onChange={(e)=>update({acceptTerms:e.target.checked})} required />
                   I agree to the Terms and Privacy Policy
                 </label>
               </div>
@@ -297,27 +327,27 @@ export default function SignupPlayer() {
               <Field label="Date of birth" required>
                 <input type="date" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.dob} onChange={(e)=>update({dob:e.target.value})} required />
               </Field>
-              <Field label="City">
-                <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.city} onChange={(e)=>update({city:e.target.value})} />
+              <Field label="City" required>
+                <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.city} onChange={(e)=>update({city:e.target.value})} required />
               </Field>
-              <Field label="State">
-                <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.state} onChange={(e)=>update({state:e.target.value})} />
+              <Field label="State" required>
+                <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.state} onChange={(e)=>update({state:e.target.value})} required />
               </Field>
               <Field label="Country" required>
                 <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.country} onChange={(e)=>update({country:e.target.value})} required />
               </Field>
               {/* Height in American system */}
               <div className="grid grid-cols-2 gap-3 sm:col-span-2">
-                <Field label="Height (ft)">
-                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.heightFeet} onChange={(e)=>update({heightFeet:e.target.value})}>
+                <Field label="Height (ft)" required>
+                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.heightFeet} onChange={(e)=>update({heightFeet:e.target.value})} required>
                     <option value="">Select</option>
                     {[4,5,6,7].map((ft)=> (
                       <option key={ft} value={ft}>{ft} ft</option>
                     ))}
                   </select>
                 </Field>
-                <Field label="Height (in)">
-                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.heightInches} onChange={(e)=>update({heightInches:e.target.value})}>
+                <Field label="Height (in)" required>
+                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.heightInches} onChange={(e)=>update({heightInches:e.target.value})} required>
                     <option value="">Select</option>
                     {Array.from({length:12}).map((_,i)=> (
                       <option key={i} value={i}>{i} in</option>
@@ -326,8 +356,8 @@ export default function SignupPlayer() {
                 </Field>
               </div>
               {/* Weight in lbs, from 150 increasing by 5 */}
-              <Field label="Weight (lbs)">
-                <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.weightLbs} onChange={(e)=>update({weightLbs:e.target.value})}>
+              <Field label="Weight (lbs)" required>
+                <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.weightLbs} onChange={(e)=>update({weightLbs:e.target.value})} required>
                   <option value="">Select</option>
                   {Array.from({length:41}).map((_,idx)=> {
                     const val = 150 + idx*5; // 150..350
@@ -345,8 +375,8 @@ export default function SignupPlayer() {
                 <Field label="Current school or team" required>
                   <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.school} onChange={(e)=>update({school:e.target.value})} required />
                 </Field>
-                <Field label="GPA / average grade">
-                  <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.gpa} onChange={(e)=>update({gpa:e.target.value})} placeholder="e.g., 3.4" />
+                <Field label="GPA / average grade" required>
+                  <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.gpa} onChange={(e)=>update({gpa:e.target.value})} placeholder="e.g., 3.4" required />
                 </Field>
               </Section>
 
@@ -424,11 +454,11 @@ export default function SignupPlayer() {
 
               <div className="sm:col-span-2 mt-8" />
               <Section title="Highlights" desc="Links to Hudl/YouTube/Drive clips.">
-                <Field label="Highlight URL 1">
-                  <input type="url" placeholder="https://hudl.com/…" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.highlightUrl1} onChange={(e)=>update({highlightUrl1:e.target.value})} />
+                <Field label="Highlight URL 1" required>
+                  <input type="url" placeholder="https://hudl.com/…" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.highlightUrl1} onChange={(e)=>update({highlightUrl1:e.target.value})} required />
                 </Field>
-                <Field label="Highlight URL 2">
-                  <input type="url" placeholder="https://youtube.com/…" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.highlightUrl2} onChange={(e)=>update({highlightUrl2:e.target.value})} />
+                <Field label="Highlight URL 2" required>
+                  <input type="url" placeholder="https://youtube.com/…" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.highlightUrl2} onChange={(e)=>update({highlightUrl2:e.target.value})} required />
                 </Field>
               </Section>
             </>
@@ -436,21 +466,22 @@ export default function SignupPlayer() {
 
           {step === 3 && (
             <Section title="Stats" desc="Season performance (numbers only).">
-              <Field label="Games">
-                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.games} onChange={(e)=>update({games:e.target.value})} />
+              <Field label="Games" required>
+                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.games} onChange={(e)=>update({games:e.target.value})} required />
               </Field>
-              <Field label="Games started">
-                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.gamesStarted} onChange={(e)=>update({gamesStarted:e.target.value})} />
+              <Field label="Games started" required>
+                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.gamesStarted} onChange={(e)=>update({gamesStarted:e.target.value})} required />
               </Field>
-              <Field label="Goals">
-                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.goals} onChange={(e)=>update({goals:e.target.value})} />
+              <Field label="Goals" required>
+                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.goals} onChange={(e)=>update({goals:e.target.value})} required />
               </Field>
-              <Field label="Assists">
-                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.assists} onChange={(e)=>update({assists:e.target.value})} />
+              <Field label="Assists" required>
+                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.assists} onChange={(e)=>update({assists:e.target.value})} required />
               </Field>
-              <Field label="Points">
-                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.points} onChange={(e)=>update({points:e.target.value})} />
+              <Field label="Points" required>
+                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.points} onChange={(e)=>update({points:e.target.value})} required />
               </Field>
+              <div className="sm:col-span-2">{errorText('stats')}</div>
             </Section>
           )}
 
@@ -466,8 +497,8 @@ export default function SignupPlayer() {
                   <option>NJCAA</option>
                 </select>
               </Field>
-              <Field label="Budget (USD)">
-                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.budget} onChange={(e)=>update({budget:e.target.value})} />
+              <Field label="Budget (USD)" required>
+                <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.budget} onChange={(e)=>update({budget:e.target.value})} required />
               </Field>
               <div className="sm:col-span-2">
                 <span className="mb-1 block text-sm font-medium text-gray-700">Preferred location (US state)</span>
@@ -482,6 +513,7 @@ export default function SignupPlayer() {
                         className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-600"
                         checked={data.preferredLocation === state}
                         onChange={() => update({ preferredLocation: state })}
+                        required={data.preferredLocation === ''}
                       />
                       <span className="select-none text-gray-800">{state}</span>
                     </label>
