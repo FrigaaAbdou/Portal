@@ -12,10 +12,10 @@ export function PrivateRoute({ children }) {
   return children
 }
 
-export function PublicOnlyRoute({ children }) {
+export function PublicOnlyRoute({ children, redirectTo = '/profile' }) {
   const authed = useAuth()
   if (authed) {
-    return <Navigate to="/" replace />
+    return <Navigate to={redirectTo} replace />
   }
   return children
 }

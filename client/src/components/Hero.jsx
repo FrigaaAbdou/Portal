@@ -7,7 +7,7 @@ export default function Hero({ onJoinPlayer, onJoinRecruiter }) {
           Connect Talent with Opportunity
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-gray-100 sm:mt-4 sm:text-base md:text-lg">
-          The premier platform connecting football players with college recruiters. Showcase your skills, discover opportunities, and take your game to the next level.
+          The premier platform connecting soccer players with college recruiters. Showcase your skills, discover opportunities, and take your game to the next level.
         </p>
         <div className="mt-6 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-7 sm:flex-row sm:items-center sm:gap-4 md:w-auto">
           <button

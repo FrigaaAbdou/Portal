@@ -20,7 +20,7 @@ export default function App() {
       <div className="min-h-screen bg-white text-gray-900">
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<PublicOnlyRoute><Home /></PublicOnlyRoute>} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><SignupLanding /></PublicOnlyRoute>} />
           <Route path="/signup/player" element={<PublicOnlyRoute><SignupPlayer /></PublicOnlyRoute>} />

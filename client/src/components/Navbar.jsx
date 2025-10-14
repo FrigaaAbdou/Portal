@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useLocation } from 'react-router-dom'
-import { getToken } from '../lib/api'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { getToken, clearToken } from '../lib/api'
 import logo from '../assets/logo.png'
 
 export default function Navbar() {
@@ -11,6 +11,7 @@ export default function Navbar() {
   const toggleRef = useRef(null)
   const avatarRef = useRef(null)
   const location = useLocation()
+  const navigate = useNavigate()
   const authed = Boolean(getToken())
 
   // Lock body scroll when the mobile menu is open
@@ -132,6 +133,17 @@ export default function Navbar() {
                   <Link to="/profile" onClick={() => setAvatarOpen(false)} className="block rounded px-3 py-2 text-gray-800 hover:bg-gray-50">Profile</Link>
                   <Link to="/settings" onClick={() => setAvatarOpen(false)} className="block rounded px-3 py-2 text-gray-800 hover:bg-gray-50">Settings</Link>
                   <Link to="/dashboard" onClick={() => setAvatarOpen(false)} className="block rounded px-3 py-2 text-gray-800 hover:bg-gray-50">Dashboard</Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearToken()
+                      setAvatarOpen(false)
+                      navigate('/login', { replace: true })
+                    }}
+                    className="block w-full rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Log out
+                  </button>
                 </div>
               )}
             </div>
@@ -190,6 +202,17 @@ export default function Navbar() {
                     <Link to="/dashboard" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-left text-sm hover:bg-gray-50">Dashboard</Link>
                     <Link to="/profile" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-left text-sm hover:bg-gray-50">Profile</Link>
                     <Link to="/settings" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-left text-sm hover:bg-gray-50">Settings</Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearToken()
+                        setOpen(false)
+                        navigate('/login', { replace: true })
+                      }}
+                      className="rounded-md px-2 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Log out
+                    </button>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
