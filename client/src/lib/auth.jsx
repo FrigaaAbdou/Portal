@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { getToken } from './api'
 
-export const useAuth = () => Boolean(getToken())
+const useAuth = () => Boolean(getToken())
 
 export function PrivateRoute({ children }) {
   const authed = useAuth()

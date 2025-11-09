@@ -13,7 +13,6 @@ function initialsFrom(name = '') {
 
 export default function MyPlayers() {
   const [players, setPlayers] = useState([])
-  const [meta, setMeta] = useState({ page: 1, total: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState(null)
@@ -33,13 +32,10 @@ export default function MyPlayers() {
       const res = await listMyJucoPlayers()
       if (res?.data) {
         setPlayers(res.data)
-        setMeta(res.meta || { page: 1, total: res.data.length })
       } else if (Array.isArray(res)) {
         setPlayers(res)
-        setMeta({ page: 1, total: res.length })
       } else {
         setPlayers([])
-        setMeta({ page: 1, total: 0 })
       }
     } catch (err) {
       setError(err?.message || 'Failed to load roster')

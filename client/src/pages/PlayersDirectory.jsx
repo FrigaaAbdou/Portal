@@ -441,7 +441,7 @@ export default function PlayersDirectory() {
                   </td>
                   <td className="px-4 py-3 align-middle text-sm font-medium text-gray-800">
                     <div className="flex flex-wrap gap-0.5">
-                      {statEntries(stats).map(([code, label, value]) => (
+                      {statEntries(stats).map(([code, , value]) => (
                         <div
                           key={code}
                           className="flex h-[38px] w-[46px] flex-col items-center justify-center rounded-lg border border-orange-100 bg-orange-50 text-center shadow-sm"

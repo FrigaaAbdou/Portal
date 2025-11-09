@@ -11,8 +11,15 @@ import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import Dashboard from './pages/Dashboard'
 import PlayersDirectory from './pages/PlayersDirectory'
+import Players from './pages/Players'
+import Recruiters from './pages/Recruiters'
 import PlayerProfile from './pages/PlayerProfile'
 import MyPlayers from './pages/MyPlayers'
+import Announcements from './pages/Announcements'
+import BillingSuccess from './pages/BillingSuccess'
+import BillingCanceled from './pages/BillingCanceled'
+import Billing from './pages/Billing'
+import About from './pages/About'
 
 export default function App() {
   return (
@@ -26,9 +33,16 @@ export default function App() {
           <Route path="/signup/player" element={<PublicOnlyRoute><SignupPlayer /></PublicOnlyRoute>} />
           <Route path="/signup/coach" element={<PublicOnlyRoute><SignupCoach /></PublicOnlyRoute>} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/players" element={<Players />} />
+          <Route path="/recruiters" element={<Recruiters />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/billing/success" element={<PrivateRoute><BillingSuccess /></PrivateRoute>} />
+          <Route path="/billing/canceled" element={<BillingCanceled />} />
+          <Route path="/announcements" element={<Announcements />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/billing" element={<PrivateRoute><Billing /></PrivateRoute>} />
           <Route path="/players/directory" element={<PrivateRoute><PlayersDirectory /></PrivateRoute>} />
           <Route path="/players/my" element={<PrivateRoute><MyPlayers /></PrivateRoute>} />
           <Route path="/players/:playerId" element={<PrivateRoute><PlayerProfile /></PrivateRoute>} />

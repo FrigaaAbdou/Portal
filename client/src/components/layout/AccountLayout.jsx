@@ -53,6 +53,13 @@ function Icon({ name }) {
           <path d="M4 9h16" />
         </svg>
       )
+    case 'announcements':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M3 10l4-2 4 2 6-3v10l-6-3-4 2-4-2v-4z" />
+          <path d="M13 7v10" />
+        </svg>
+      )
     default:
       return null
   }
@@ -90,8 +97,9 @@ export default function AccountLayout({ title, children }) {
     if (isRecruiter) {
       items.push({ label: 'Player Directory', to: '/players/directory', icon: 'players' })
     }
+    items.push({ label: 'Announcements', to: '/announcements', icon: 'announcements' })
     items.push({ label: 'Settings', to: '/settings', icon: 'settings' })
-    items.push({ label: 'Billing', to: '/pricing', icon: 'billing' })
+    items.push({ label: 'Billing', to: '/billing', icon: 'billing' })
     return items
   }, [isJucoCoach, isRecruiter])
 

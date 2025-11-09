@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 import AccountLayout from '../components/layout/AccountLayout'
 import { getMyPlayerProfile, getMyCoachProfile, savePlayerProfile, saveCoachProfile, listMyJucoPlayers } from '../lib/api'
+import VerificationDialog from '../components/verification/VerificationDialog'
 
 function SectionCard({ title, subtitle, icon: Icon, children, canEdit = false, onEdit, className = '' }) {
   return (
@@ -116,25 +117,6 @@ function HeaderPanel({ name, subtitle, coverUrl, avatarUrl, fallbackInitials, ro
         </div>
       </div>
     </section>
-  )
-}
-
-function VerifyModal({ open, onClose, title, children, footer }) {
-  if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute inset-0 grid place-items-center p-4">
-        <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
-          <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
-            <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-            <button onClick={onClose} aria-label="Close" className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">×</button>
-          </div>
-          <div className="px-5 py-4 text-sm text-gray-700">{children}</div>
-          <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-5 py-3">{footer}</div>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -383,10 +365,7 @@ export default function Profile() {
   const [editingPrefs, setEditingPrefs] = useState(false)
   const [prefsForm, setPrefsForm] = useState({ division: '', budget: 0, preferredLocation: '' })
   const [savingPrefs, setSavingPrefs] = useState(false)
-  const [verifyOpen, setVerifyOpen] = useState(false)
-  const [verifyNote, setVerifyNote] = useState('')
-  const [verifyConfirm, setVerifyConfirm] = useState(false)
-  const [verifySaving, setVerifySaving] = useState(false)
+  const [showVerification, setShowVerification] = useState(false)
   const [editingCoachAbout, setEditingCoachAbout] = useState(false)
   const [coachAboutForm, setCoachAboutForm] = useState({
     firstName: '',
@@ -693,7 +672,7 @@ export default function Profile() {
             subtitle="Keep your profile trusted by college programs."
             icon={ShieldCheckIcon}
           canEdit
-          onEdit={() => setVerifyOpen(true)}
+          onEdit={() => setShowVerification(true)}
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2 text-sm">
@@ -705,10 +684,10 @@ export default function Profile() {
               )}
             </div>
             <button
-              onClick={() => setVerifyOpen(true)}
+              onClick={() => setShowVerification(true)}
               className="inline-flex items-center gap-2 rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
             >
-              Request update
+              {p.verificationStatus === 'verified' ? 'View status' : 'Get Verified'}
               <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -960,44 +939,11 @@ export default function Profile() {
         </div>
       </div>
       </AccountLayout>
-      <VerifyModal
-        open={verifyOpen}
-        onClose={() => setVerifyOpen(false)}
-        title="Request Verification"
-        footer={(
-          <>
-            <button onClick={() => setVerifyOpen(false)} className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-300 hover:bg-gray-50">Cancel</button>
-            <button
-              disabled={!verifyConfirm || verifySaving}
-              onClick={async()=>{
-                setVerifySaving(true)
-                try {
-                  const updated = await savePlayerProfile({ verificationStatus: 'requested', verificationNote: verifyNote })
-                  setPlayer(updated || null)
-                  setVerifyOpen(false)
-                } catch(e){
-                  alert(e?.message||'Failed to request verification')
-                } finally {
-                  setVerifySaving(false)
-                }
-              }}
-              className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 disabled:opacity-50"
-            >{verifySaving ? 'Submitting…' : 'Submit'}</button>
-          </>
-        )}
-      >
-        <div className="space-y-3 text-sm">
-          <p className="text-gray-700">Request profile verification. An admin or coach may review your details before marking you as verified.</p>
-          <label className="block">
-            <span className="mb-1 block text-gray-700">Optional note</span>
-            <textarea rows={3} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={verifyNote} onChange={(e)=>setVerifyNote(e.target.value)} placeholder="Anything we should know for verification…" />
-          </label>
-          <label className="inline-flex items-center gap-2">
-            <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-600" checked={verifyConfirm} onChange={(e)=>setVerifyConfirm(e.target.checked)} />
-            <span className="text-gray-700">I confirm my information is accurate.</span>
-          </label>
-        </div>
-      </VerifyModal>
+      <VerificationDialog
+        open={showVerification}
+        onClose={() => setShowVerification(false)}
+        player={player}
+      />
       </>
     )
   }
@@ -1145,14 +1091,11 @@ export default function Profile() {
                       onChange={(e) => setCoachAboutForm((prev) => ({ ...prev, jucoState: e.target.value }))}
                     />
                   </label>
-                  <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600">Phone</span>
-                    <input
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0"
-                      value={coachAboutForm.jucoPhone}
-                      onChange={(e) => setCoachAboutForm((prev) => ({ ...prev, jucoPhone: e.target.value }))}
-                    />
-                  </label>
+                  <PhoneInput
+                    label="Phone"
+                    value={coachAboutForm.jucoPhone}
+                    onChange={(val) => setCoachAboutForm((prev) => ({ ...prev, jucoPhone: val }))}
+                  />
                   <label className="block text-sm">
                     <span className="mb-1 block text-gray-600">Email</span>
                     <input
@@ -1210,14 +1153,11 @@ export default function Profile() {
                       onChange={(e) => setCoachAboutForm((prev) => ({ ...prev, uniAddress: e.target.value }))}
                     />
                   </label>
-                  <label className="block text-sm">
-                    <span className="mb-1 block text-gray-600">Phone</span>
-                    <input
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0"
-                      value={coachAboutForm.uniPhone}
-                      onChange={(e) => setCoachAboutForm((prev) => ({ ...prev, uniPhone: e.target.value }))}
-                    />
-                  </label>
+                  <PhoneInput
+                    label="Phone"
+                    value={coachAboutForm.uniPhone}
+                    onChange={(val) => setCoachAboutForm((prev) => ({ ...prev, uniPhone: val }))}
+                  />
                 </div>
               )}
               <div className="mt-2 flex items-center gap-2">

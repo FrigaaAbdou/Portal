@@ -12,9 +12,11 @@ export default function Footer() {
         </div>
         <nav className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
           <Link to="/pricing" className="hover:text-gray-900">Pricing</Link>
+          <Link to="/players" className="hover:text-gray-900">Players</Link>
+          <Link to="/recruiters" className="hover:text-gray-900">Recruiters</Link>
           <Link to="/signup/player" className="hover:text-gray-900">Join as Player</Link>
           <Link to="/signup/coach" className="hover:text-gray-900">Join as Recruiter</Link>
-          <a href="#about" className="hover:text-gray-900">About</a>
+          <Link to="/about" className="hover:text-gray-900">About</Link>
         </nav>
         <p className="text-sm text-gray-400">© {year} Portal. All rights reserved.</p>
       </div>

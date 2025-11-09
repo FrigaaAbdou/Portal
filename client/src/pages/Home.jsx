@@ -1,5 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  UserCircleIcon,
+  AcademicCapIcon,
+  ClipboardDocumentListIcon,
+  VideoCameraIcon,
+  ClipboardDocumentCheckIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline'
 import Hero from '../components/Hero'
 import Dialog from '../components/ui/Dialog'
 import Footer from '../components/Footer'
@@ -19,64 +27,70 @@ export default function Home() {
         />
 
         {/* Audience */}
-        <section className="bg-gray-50 py-12 md:py-16">
+        <section className="relative overflow-hidden bg-gradient-to-b from-gray-50 via-white to-white py-14">
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-orange-50/40 to-transparent" />
           <div className="mx-auto max-w-6xl px-6">
-            <div className="mb-10 text-center">
-              <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">Built for every role</span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">One platform, three winning experiences</h2>
-              <p className="mt-3 text-sm text-gray-600 sm:text-base">
-                Portal empowers players, JUCO coaches, and NCAA/NAIA recruiters with workflows tailored to their goals.
+            <div className="mb-12 text-center">
+              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Built for every role</span>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">One platform, three winning experiences</h2>
+              <p className="mx-auto mt-4 max-w-3xl text-sm text-gray-600 sm:text-base">
+                Portal empowers players, JUCO coaches, and NCAA/NAIA recruiters with workflows tailored to their goals. Shared data keeps everyone aligned.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
               {[
                 {
                   title: 'Players',
-                  icon: '⚽️',
-                  description: 'Showcase videos, stats, and academics while targeting programs that match your goals and budget.',
+                  Icon: UserCircleIcon,
+                  description: 'Showcase videos, stats, academics, and transfer goals in a profile recruiters can trust.',
                   action: () => navigate('/signup/player'),
                   actionLabel: 'Create profile',
+                  accent: 'from-orange-500/15 to-orange-500/5',
+                  button: 'bg-orange-500 hover:bg-orange-600',
                 },
                 {
                   title: 'JUCO Coaches',
-                  icon: '🎓',
-                  description: 'Evaluate rosters, validate NCAA eligibility, and elevate your athletes to four-year programs.',
+                  Icon: AcademicCapIcon,
+                  description: 'Evaluate rosters, validate NCAA eligibility, and spotlight your athletes nationwide.',
                   action: () => navigate('/signup/coach'),
                   actionLabel: 'Support your roster',
+                  accent: 'from-blue-500/15 to-blue-500/5',
+                  button: 'bg-blue-500 hover:bg-blue-600',
                 },
                 {
                   title: 'NCAA/NAIA Coaches',
-                  icon: '📋',
-                  description: 'Filter by position, GPA, and budget, build playlists, and connect only with players who fit.',
+                  Icon: ClipboardDocumentListIcon,
+                  description: 'Filter by position, GPA, budget, and impact level to make confident recruiting decisions.',
                   action: () => navigate('/signup/coach'),
                   actionLabel: 'Recruit smarter',
+                  accent: 'from-emerald-500/15 to-emerald-500/5',
+                  button: 'bg-emerald-500 hover:bg-emerald-600',
                 },
-              ].map(({ title, icon, description, action, actionLabel }, index) => (
+              ].map(({ title, Icon, description, action, actionLabel, accent, button }) => (
                 <div
                   key={title}
-                  className="group flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg"
+                  className="group relative overflow-hidden rounded-3xl border border-white/70 bg-white/80 p-6 shadow-lg ring-1 ring-black/5 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">{icon}</span>
-                    <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                  <div aria-hidden className={`absolute inset-0 opacity-0 blur-3xl transition group-hover:opacity-100 bg-gradient-to-br ${accent}`} />
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-center gap-4">
+                      <span className="inline-flex rounded-2xl bg-white p-3 text-orange-500 shadow-inner ring-1 ring-black/5">
+                        <Icon className="h-6 w-6" aria-hidden />
+                      </span>
+                      <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                    </div>
+                    <p className="mt-4 flex-1 text-sm text-gray-600">{description}</p>
+                    <button
+                      type="button"
+                      onClick={action}
+                      className={`mt-6 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm transition ${button}`}
+                    >
+                      {actionLabel}
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </div>
-                  <p className="mt-4 flex-1 text-sm text-gray-600">{description}</p>
-                  <button
-                    type="button"
-                    onClick={action}
-                    className={`mt-6 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm transition ${
-                      index === 0
-                        ? 'bg-orange-500 hover:bg-orange-600'
-                        : index === 1
-                          ? 'bg-blue-500 hover:bg-blue-600'
-                          : 'bg-emerald-500 hover:bg-emerald-600'
-                    }`}
-                  >
-                    {actionLabel}
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
                 </div>
               ))}
             </div>
@@ -84,13 +98,17 @@ export default function Home() {
         </section>
 
         {/* How it works */}
-        <section className="bg-white py-12 md:py-16">
+        <section className="bg-white py-16">
           <div className="mx-auto max-w-5xl px-6">
             <div className="text-center">
-              <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">Simple workflow</span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">From profile to placement in four steps</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Simple workflow</span>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">From profile to placement in four steps</h2>
+              <p className="mx-auto mt-3 max-w-3xl text-sm text-gray-600 sm:text-base">
+                Each stage keeps NJCAA players, coaches, and NCAA/NAIA recruiters aligned with transparent checkpoints.
+              </p>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-4">
+            <div className="relative mt-12 grid gap-6 md:grid-cols-4">
+              <div aria-hidden className="pointer-events-none absolute inset-x-12 top-1/2 hidden h-px bg-gradient-to-r from-orange-200 via-gray-200 to-emerald-200 md:block" />
               {[
                 {
                   step: '01',
@@ -113,9 +131,11 @@ export default function Home() {
                   copy: 'Interest-based messaging keeps communication focused and relevant.',
                 },
               ].map(({ step, title, copy }) => (
-                <div key={step} className="rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">{step}</span>
-                  <h3 className="mt-3 text-base font-semibold text-gray-900">{title}</h3>
+                <div key={step} className="relative rounded-3xl border border-gray-100 bg-gray-50 p-6 text-left shadow-sm">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10 text-sm font-semibold text-orange-600">
+                    {step}
+                  </span>
+                  <h3 className="mt-4 text-lg font-semibold text-gray-900">{title}</h3>
                   <p className="mt-2 text-sm text-gray-600">{copy}</p>
                 </div>
               ))}
@@ -151,38 +171,43 @@ export default function Home() {
         </section>
 
         {/* Feature Highlights */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-emerald-50 py-14">
-          <div aria-hidden className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl md:left-20" />
-          <div aria-hidden className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl md:right-10" />
+        <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-emerald-50 py-16">
+          <div aria-hidden className="pointer-events-none absolute -left-16 top-16 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl" />
           <div className="relative mx-auto max-w-6xl px-6">
             <div className="text-center md:text-left">
-              <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">Why it works</span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Tools that respect the process</h2>
-              <p className="mt-3 max-w-2xl text-sm text-gray-600 sm:text-base">
-                Portal blends athlete storytelling, JUCO validation, and recruiter efficiency into a single collaborative hub.
+              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Why it works</span>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Tools that respect the process</h2>
+              <p className="mt-3 max-w-3xl text-sm text-gray-600 sm:text-base">
+                Portal blends athlete storytelling, JUCO validation, and recruiter efficiency into one collaborative hub with clear ownership at every step.
               </p>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[
                 {
                   title: 'Profile studio',
-                  icon: '🎥',
+                  Icon: VideoCameraIcon,
                   copy: 'Upload highlight reels, break down stats, track academics, and share budget expectations in one polished profile.',
+                  accent: 'bg-orange-500/10 text-orange-600',
                 },
                 {
                   title: 'Evaluation suite',
-                  icon: '📝',
+                  Icon: ClipboardDocumentCheckIcon,
                   copy: 'JUCO coaches log strengths, projections, and eligibility so recruiters trust what they see.',
+                  accent: 'bg-blue-500/10 text-blue-600',
                 },
                 {
                   title: 'Smart matching',
-                  icon: '✨',
+                  Icon: SparklesIcon,
                   copy: 'Automatic tiers like Immediate Impact or Hidden Gem guide recruiters to the right athletes fast.',
+                  accent: 'bg-emerald-500/10 text-emerald-600',
                 },
-              ].map(({ title, icon, copy }) => (
-                <div key={title} className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-lg">
-                  <span className="text-3xl">{icon}</span>
-                  <h3 className="mt-4 text-lg font-semibold text-gray-900">{title}</h3>
+              ].map(({ title, Icon, copy, accent }) => (
+                <div key={title} className="rounded-3xl border border-white/50 bg-white/80 p-6 shadow-lg ring-1 ring-black/5 backdrop-blur">
+                  <span className={`inline-flex rounded-2xl p-3 ${accent} shadow-inner`}>
+                    <Icon className="h-6 w-6" aria-hidden />
+                  </span>
+                  <h3 className="mt-5 text-xl font-semibold text-gray-900">{title}</h3>
                   <p className="mt-3 text-sm text-gray-600">{copy}</p>
                 </div>
               ))}
@@ -191,13 +216,13 @@ export default function Home() {
         </section>
 
         {/* Testimonials */}
-        <section className="bg-white py-14 md:py-16">
+        <section className="bg-gray-50 py-16">
           <div className="mx-auto max-w-6xl px-6">
             <div className="text-center">
-              <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">Real voices</span>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">What our community is saying</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Real voices</span>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">What our community is saying</h2>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[
                 {
                   quote: 'Portal gave me the structure to present myself professionally. Within weeks I had three coaches ask for film.',
@@ -215,11 +240,12 @@ export default function Home() {
                   role: 'Recruiting Coordinator, NCAA D2',
                 },
               ].map(({ quote, name, role }) => (
-                <figure key={name} className="flex h-full flex-col rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-sm">
+                <figure key={name} className="relative flex h-full flex-col rounded-3xl border border-white/80 bg-white p-6 shadow-lg ring-1 ring-black/5">
+                  <div aria-hidden className="absolute -top-6 right-6 text-6xl text-orange-100">”</div>
                   <p className="text-sm text-gray-700">“{quote}”</p>
-                  <figcaption className="mt-5">
+                  <figcaption className="mt-6">
                     <p className="text-sm font-semibold text-gray-900">{name}</p>
-                    <p className="text-xs text-gray-500">{role}</p>
+                    <p className="text-xs uppercase tracking-wide text-gray-500">{role}</p>
                   </figcaption>
                 </figure>
               ))}

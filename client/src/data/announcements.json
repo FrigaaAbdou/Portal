@@ -1,0 +1,80 @@
+[
+  {
+    "id": "prod-2024-06-advanced-search",
+    "type": "product_update",
+    "badge": "New",
+    "title": "Advanced player search filters are live",
+    "summary": "Recruiters can now combine GPA, budget, and multi-position filters to zero in on the right athletes faster.",
+    "audienceTags": ["ncca_coach", "naia_coach", "staff"],
+    "publishedAt": "2024-06-12T10:00:00.000Z",
+    "cta": {
+      "label": "Try the new filters",
+      "url": "/players/directory?feature=advanced-filters"
+    },
+    "image": "/announcements/advanced-filters.jpg"
+  },
+  {
+    "id": "sponsor-2024-06-mountain-west-camp",
+    "type": "sponsor_spotlight",
+    "badge": "Sponsored",
+    "title": "Mountain West Summer ID Camp registration open",
+    "summary": "Top JUCO coaches are hosting a three-day camp with pro videographers on-site. Limited spots for midfielders and forwards.",
+    "audienceTags": ["player", "international_player"],
+    "publishedAt": "2024-06-10T15:30:00.000Z",
+    "expiresAt": "2024-07-02T23:59:59.000Z",
+    "cta": {
+      "label": "Secure your spot",
+      "url": "https://example.com/mountain-west-camp",
+      "ariaLabel": "Register for the Mountain West Summer ID Camp"
+    },
+    "image": "/announcements/mountain-west-camp.jpg"
+  },
+  {
+    "id": "program-2024-06-lakeside-scholarship",
+    "type": "program_news",
+    "title": "Lakeside University opens 3 full scholarships for 2025 class",
+    "summary": "DII program Lakeside University is looking for defenders with GPA 3.2+ and budget flexibility. Applications reviewed weekly.",
+    "audienceTags": ["player", "juco_coach"],
+    "publishedAt": "2024-06-08T09:15:00.000Z",
+    "cta": {
+      "label": "Apply via Portal",
+      "url": "https://example.com/lakeside-apply"
+    }
+  },
+  {
+    "id": "prod-2024-05-roster-sync",
+    "type": "product_update",
+    "title": "Roster sync now links JUCO notes automatically",
+    "summary": "When your players list your program, Portal keeps notes in sync across JUCO staff accounts with instant updates.",
+    "audienceTags": ["juco_coach", "staff"],
+    "publishedAt": "2024-05-28T13:00:00.000Z",
+    "cta": {
+      "label": "Review your roster",
+      "url": "/players/my"
+    }
+  },
+  {
+    "id": "program-2024-05-north-ridge-showcase",
+    "type": "program_news",
+    "title": "North Ridge Showcase invites top JUCO defenders",
+    "summary": "NAIA powerhouse North Ridge is hosting a virtual showcase for defenders marked “Immediate Impact.” Spots fill fast.",
+    "audienceTags": ["juco_coach", "player"],
+    "publishedAt": "2024-05-20T18:45:00.000Z",
+    "cta": {
+      "label": "Nominate a player",
+      "url": "/players/my?highlight=north-ridge"
+    }
+  },
+  {
+    "id": "sponsor-2024-05-gear-partner",
+    "type": "sponsor_spotlight",
+    "title": "ProFit gear discount for verified athletes",
+    "summary": "Verified Portal players get 20% off the ProFit summer training kit until July 15.",
+    "audienceTags": ["player"],
+    "publishedAt": "2024-05-18T11:20:00.000Z",
+    "cta": {
+      "label": "Claim discount code",
+      "url": "https://example.com/profit-portal"
+    }
+  }
+]

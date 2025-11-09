@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { register as apiRegister, login as apiLogin, setToken, clearToken, saveCoachProfile } from '../lib/api'
 import PasswordField from '../components/PasswordField'
+import PhoneInput from '../components/ui/PhoneInput'
 const JUCO_LEAGUES = ['NJCAA', 'CCCAA', 'NWAC', 'Other']
 const DIVISION_OPTIONS = ['NCAA D1', 'NCAA D2', 'NCAA D3', 'NAIA', 'NJCAA']
 const BUDGET_OPTIONS = ['<$5k', '$5k-$10k', '$10k-$20k', '$20k-$40k', '>$40k']
@@ -294,9 +295,14 @@ export default function SignupCoach() {
               <Field label="Last name" required>
                 <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.lastName} onChange={(e)=>update({lastName:e.target.value})} />
               </Field>
-              <Field label="Mobile phone" required>
-                <input type="tel" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.phone} onChange={(e)=>update({phone:e.target.value})} placeholder="(555) 123-4567" />
-              </Field>
+              <div className="sm:col-span-2">
+                <PhoneInput
+                  label="Mobile phone"
+                  required
+                  value={data.phone}
+                  onChange={(val) => update({ phone: val })}
+                />
+              </div>
               <Field label={data.coachType === 'JUCO' ? 'Coaching role' : 'Title'} required>
                 <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.roleTitle} onChange={(e)=>update({roleTitle:e.target.value})}>
                   <option value="">Select…</option>

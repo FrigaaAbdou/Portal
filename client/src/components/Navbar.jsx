@@ -109,10 +109,11 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-8 text-sm font-medium text-gray-700 md:flex">
-          <a href="#players" className="hover:text-gray-900">Players</a>
-          <a href="#recruiters" className="hover:text-gray-900">Recruiters</a>
-          <a href="#about" className="hover:text-gray-900">About</a>
+          <Link to="/players" className="hover:text-gray-900">Players</Link>
+          <Link to="/recruiters" className="hover:text-gray-900">Recruiters</Link>
+          <Link to="/about" className="hover:text-gray-900">About</Link>
           <Link to="/pricing" className="hover:text-gray-900">Pricing</Link>
+          <Link to="/announcements" className="hover:text-gray-900">Announcements</Link>
         </div>
 
         {/* Right: Auth (desktop) */}
@@ -187,10 +188,11 @@ export default function Navbar() {
                 </button>
               </div>
               <nav className="flex flex-col gap-2 text-sm font-medium text-gray-800">
-                <a href="#players" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Players</a>
-                <a href="#recruiters" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Recruiters</a>
-                <a href="#about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</a>
-                <Link to="/pricing" className="rounded-md px-2 py-2 hover:bg-gray-50">Pricing</Link>
+                  <Link to="/players" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Players</Link>
+                  <Link to="/recruiters" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Recruiters</Link>
+                <Link to="/about" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>About</Link>
+                <Link to="/pricing" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Pricing</Link>
+                <Link to="/announcements" className="rounded-md px-2 py-2 hover:bg-gray-50" onClick={() => setOpen(false)}>Announcements</Link>
               </nav>
               <div className="mt-3 border-t border-gray-200 pt-3">
                 {authed ? (

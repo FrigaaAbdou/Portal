@@ -28,7 +28,10 @@ export async function apiFetch(path, { method = 'GET', body, auth = false } = {}
   try { json = text ? JSON.parse(text) : null } catch { json = { raw: text } }
   if (!res.ok) {
     const msg = (json && (json.error || json.message)) || `HTTP ${res.status}`
-    throw new Error(msg)
+    const error = new Error(msg)
+    error.status = res.status
+    error.data = json
+    throw error
   }
   return json
 }
@@ -91,6 +94,52 @@ export async function updateFavorite(id, { note, tags }) {
 export async function removeFavorite(playerId) {
   return apiFetch(`/favorites/${playerId}`, { method: 'DELETE', auth: true })
 }
+
+export async function fetchAnnouncements({ includeExpired = false } = {}) {
+  const query = includeExpired ? '?includeExpired=true' : ''
+  const res = await apiFetch(`/announcements${query}`)
+  return res?.data || []
+}
+
+export function logEngagement(event, payload = {}) {
+  try {
+    const body = {
+      event,
+      payload,
+      at: new Date().toISOString(),
+    }
+    const stored = JSON.parse(localStorage.getItem('__portal_announce_log__') || '[]')
+    stored.unshift(body)
+    localStorage.setItem('__portal_announce_log__', JSON.stringify(stored.slice(0, 50)))
+    console.info('[Announcements]', event, payload)
+  } catch (err) {
+    console.warn('Failed to log announcement engagement', err)
+  }
+}
+
+export function startEmailVerification() {
+  return apiFetch('/verification/start', { method: 'POST', auth: true })
+}
+
+export function confirmEmailVerification(code) {
+  return apiFetch('/verification/email/confirm', { method: 'POST', body: { code }, auth: true })
+}
+
+export function sendPhoneVerification(phone) {
+  return apiFetch('/verification/phone/send', { method: 'POST', body: { phone }, auth: true })
+}
+
+export function confirmPhoneVerification(code) {
+  return apiFetch('/verification/phone/confirm', { method: 'POST', body: { code }, auth: true })
+}
+
+export function submitVerificationStats(payload) {
+  return apiFetch('/verification/stats', { method: 'POST', body: payload, auth: true })
+}
+
+export function fetchVerificationStatus() {
+  return apiFetch('/verification/me', { auth: true })
+}
 export async function getPlayerProfileById(id) {
   if (!id) throw new Error('Player id is required')
   return apiFetch(`/players/${id}`, { auth: true })
@@ -113,4 +162,25 @@ export async function updateJucoPlayerNote(playerId, note) {
     body: { note },
     auth: true,
   })
+}
+
+export async function createCheckoutSession(priceId) {
+  const res = await apiFetch('/payments/checkout', {
+    method: 'POST',
+    body: { priceId },
+    auth: true,
+  })
+  return res?.url
+}
+
+export async function createBillingPortalSession() {
+  const res = await apiFetch('/payments/portal', {
+    method: 'POST',
+    auth: true,
+  })
+  return res?.url
+}
+
+export async function fetchSubscriptionInfo() {
+  return apiFetch('/payments/me', { auth: true })
 }

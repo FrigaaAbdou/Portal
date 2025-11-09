@@ -33,9 +33,21 @@ const initialData = {
 
 function usePersistedForm(key, defaultValue) {
   const [value, setValue] = useState(() => {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : defaultValue } catch { return defaultValue }
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw) : defaultValue
+    } catch (err) {
+      console.warn('Failed to read persisted form data', err)
+      return defaultValue
+    }
   })
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(value)) } catch {} }, [key, value])
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (err) {
+      console.warn('Failed to persist form data', err)
+    }
+  }, [key, value])
   return [value, setValue]
 }
 
@@ -228,7 +240,7 @@ export default function SignupPlayer() {
     }
   }
 
-  const errorText = (key) => touched[steps[step].key] && !validators[steps[step].key]() ? (
+  const errorText = () => touched[steps[step].key] && !validators[steps[step].key]() ? (
     <p className="mt-2 text-xs text-rose-600">Please complete required fields to continue.</p>
   ) : null
 
@@ -315,7 +327,7 @@ export default function SignupPlayer() {
                   I agree to the Terms and Privacy Policy
                 </label>
               </div>
-              <div className="sm:col-span-2">{errorText('account')}</div>
+              <div className="sm:col-span-2">{errorText()}</div>
             </Section>
           )}
 
@@ -365,7 +377,7 @@ export default function SignupPlayer() {
                   })}
                 </select>
               </Field>
-              <div className="sm:col-span-2">{errorText('personal')}</div>
+              <div className="sm:col-span-2">{errorText()}</div>
             </Section>
           )}
 
@@ -447,7 +459,7 @@ export default function SignupPlayer() {
                   </div>
                   <div className="text-xs text-gray-500">Select up to {POSITION_LIMIT} positions. Primary should be first.</div>
                 </div>
-                <div className="sm:col-span-2">{errorText('background')}</div>
+                <div className="sm:col-span-2">{errorText()}</div>
               </Section>
 
               
@@ -481,7 +493,7 @@ export default function SignupPlayer() {
               <Field label="Points" required>
                 <input type="number" min="0" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.points} onChange={(e)=>update({points:e.target.value})} required />
               </Field>
-              <div className="sm:col-span-2">{errorText('stats')}</div>
+              <div className="sm:col-span-2">{errorText()}</div>
             </Section>
           )}
 
@@ -520,7 +532,7 @@ export default function SignupPlayer() {
                   ))}
                 </div>
               </div>
-              <div className="sm:col-span-2">{errorText('preferences')}</div>
+              <div className="sm:col-span-2">{errorText()}</div>
             </Section>
           )}
 
