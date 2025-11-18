@@ -60,6 +60,31 @@ function Icon({ name }) {
           <path d="M13 7v10" />
         </svg>
       )
+    case 'audit':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      )
+    case 'webhooks':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M4 9a4 4 0 1 1 6.7-3" />
+          <path d="M20 15a4 4 0 1 1-6.7 3" />
+          <path d="M6.5 17.5 10 10m4 0 3.5-7.5" />
+        </svg>
+      )
+    case 'admin':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+        </svg>
+      )
     default:
       return null
   }
@@ -73,6 +98,7 @@ export default function AccountLayout({ title, children }) {
   const role = coachProfile?.coachType || ''
   const isRecruiter = role === 'NCAA'
   const isJucoCoach = role === 'JUCO'
+  const isAdmin = (localStorage.getItem('role') || '') === 'admin'
 
   useEffect(() => {
     let active = true
@@ -98,10 +124,26 @@ export default function AccountLayout({ title, children }) {
       items.push({ label: 'Player Directory', to: '/players/directory', icon: 'players' })
     }
     items.push({ label: 'Announcements', to: '/announcements', icon: 'announcements' })
+
+    // Admin section
+    if (isAdmin) {
+      items.push({ label: 'divider-admin', isDivider: true })
+      items.push({ label: 'Admin Home', to: '/admin', icon: 'dashboard', exact: true })
+      items.push({ label: 'Verification Inbox', to: '/admin/verifications', icon: 'announcements' })
+      items.push({ label: 'Users', to: '/admin/users', icon: 'players' })
+      items.push({ label: 'Invites', to: '/admin/invites', icon: 'profile' })
+      items.push({ label: 'Announcements (CMS)', to: '/admin/announcements', icon: 'announcements' })
+      items.push({ label: 'Financial Dashboard', to: '/admin/financial', icon: 'billing' })
+      items.push({ label: 'Webhook Logs', to: '/admin/webhooks', icon: 'settings' })
+      items.push({ label: 'Audit Log', to: '/admin/audit', icon: 'settings' })
+      items.push({ label: 'Reports', to: '/admin/reports', icon: 'dashboard' })
+      items.push({ label: 'Admin Settings', to: '/admin/settings', icon: 'settings' })
+    }
+
+    items.push({ label: 'divider-personal', isDivider: true })
     items.push({ label: 'Settings', to: '/settings', icon: 'settings' })
-    items.push({ label: 'Billing', to: '/billing', icon: 'billing' })
     return items
-  }, [isJucoCoach, isRecruiter])
+  }, [isJucoCoach, isRecruiter, isAdmin])
 
   return (
     <main className="min-h-[100dvh] bg-gray-50">
@@ -109,18 +151,24 @@ export default function AccountLayout({ title, children }) {
         <aside className="border-b border-gray-200 bg-white p-3 md:sticky md:top-[64px] md:h-[calc(100dvh-64px)] md:border-b-0 md:border-r md:overflow-hidden">
           <div className="flex h-full flex-col">
             <nav className="flex flex-col gap-1">
-              {nav.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${isActive ? 'bg-orange-50 text-orange-700' : 'text-gray-700 hover:bg-gray-50'}`
-                  }
-                >
-                  <Icon name={item.icon} />
-                  <span>{item.label}</span>
-                </NavLink>
-              ))}
+              {nav.map((item) => {
+                if (item.isDivider) {
+                  return <div key={item.label} className="my-1 border-t border-gray-200" aria-hidden />
+                }
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={Boolean(item.exact)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${isActive ? 'bg-orange-50 text-orange-700' : 'text-gray-700 hover:bg-gray-50'}`
+                    }
+                  >
+                    <Icon name={item.icon} />
+                    <span>{item.label}</span>
+                  </NavLink>
+                )
+              })}
             </nav>
             <div className="mt-auto mb-3 pt-3">
               <button

@@ -8,8 +8,19 @@ export function setToken(token) {
   if (token) localStorage.setItem('token', token)
 }
 
+export function setRole(role) {
+  if (role) {
+    localStorage.setItem('role', role)
+  }
+}
+
 export function clearToken() {
   localStorage.removeItem('token')
+  localStorage.removeItem('role')
+}
+
+export async function fetchMe() {
+  return apiFetch('/auth/me', { auth: true })
 }
 
 export async function apiFetch(path, { method = 'GET', body, auth = false } = {}) {
@@ -99,6 +110,100 @@ export async function fetchAnnouncements({ includeExpired = false } = {}) {
   const query = includeExpired ? '?includeExpired=true' : ''
   const res = await apiFetch(`/announcements${query}`)
   return res?.data || []
+}
+
+// Admin placeholder endpoints to be implemented when server routes exist
+export async function listAdminVerifications(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/verifications${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function listAdminInvites() {
+  return apiFetch('/admin/invites', { auth: true })
+}
+
+export async function listAdminAnnouncements(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/announcements${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function createAdminAnnouncement(payload) {
+  return apiFetch('/admin/announcements', { method: 'POST', body: payload, auth: true })
+}
+
+export async function updateAdminAnnouncement(id, payload) {
+  if (!id) throw new Error('Announcement id is required')
+  return apiFetch(`/admin/announcements/${id}`, { method: 'PUT', body: payload, auth: true })
+}
+
+export async function deleteAdminAnnouncement(id) {
+  if (!id) throw new Error('Announcement id is required')
+  return apiFetch(`/admin/announcements/${id}`, { method: 'DELETE', auth: true })
+}
+
+export async function fetchAdminFinancialSummary(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/finance/summary${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function fetchAdminFinanceRevenueTimeseries(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/finance/revenue-timeseries${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function fetchAdminFinanceSubscriptionsTimeseries(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/finance/subscriptions-timeseries${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function fetchAdminFinanceTransactions(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/finance/transactions${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function listAdminUsers(params = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    searchParams.append(key, String(value))
+  })
+  const query = searchParams.toString()
+  return apiFetch(`/admin/users${query ? `?${query}` : ''}`, { auth: true })
+}
+
+export async function getAdminUser(id) {
+  if (!id) throw new Error('User id is required')
+  return apiFetch(`/admin/users/${id}`, { auth: true })
 }
 
 export function logEngagement(event, payload = {}) {

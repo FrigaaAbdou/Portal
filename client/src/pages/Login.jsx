@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/logo.png'
-import { login, setToken, clearToken, getToken } from '../lib/api'
+import { login, setToken, setRole, clearToken, getToken } from '../lib/api'
 import PasswordField from '../components/PasswordField'
 
 export default function Login() {
@@ -21,6 +21,7 @@ export default function Login() {
     try {
       const res = await login(email, password)
       setToken(res.token)
+      setRole(res?.user?.role)
       navigate('/')
     } catch (err) {
       alert(err.message || 'Login failed')

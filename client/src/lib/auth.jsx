@@ -12,6 +12,19 @@ export function PrivateRoute({ children }) {
   return children
 }
 
+export function AdminRoute({ children }) {
+  const authed = useAuth()
+  const location = useLocation()
+  const role = localStorage.getItem('role') || ''
+  if (!authed) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+  if (role !== 'admin') {
+    return <Navigate to="/dashboard" replace />
+  }
+  return children
+}
+
 export function PublicOnlyRoute({ children, redirectTo = '/profile' }) {
   const authed = useAuth()
   if (authed) {

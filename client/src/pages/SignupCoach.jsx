@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { register as apiRegister, login as apiLogin, setToken, clearToken, saveCoachProfile } from '../lib/api'
+import { register as apiRegister, login as apiLogin, setToken, setRole, clearToken, saveCoachProfile } from '../lib/api'
 import PasswordField from '../components/PasswordField'
 import PhoneInput from '../components/ui/PhoneInput'
 const JUCO_LEAGUES = ['NJCAA', 'CCCAA', 'NWAC', 'Other']
@@ -183,10 +183,12 @@ export default function SignupCoach() {
       try {
         const reg = await apiRegister(data.email, data.password, 'coach')
         setToken(reg.token)
+        setRole(reg?.user?.role || 'coach')
       } catch (err) {
         if (String(err.message || '').toLowerCase().includes('already')) {
           const lg = await apiLogin(data.email, data.password)
           setToken(lg.token)
+          setRole(lg?.user?.role || 'coach')
         } else {
           throw err
         }

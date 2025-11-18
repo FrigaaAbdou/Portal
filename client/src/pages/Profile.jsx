@@ -417,7 +417,13 @@ export default function Profile() {
     return () => { mounted = false }
   }, [])
 
-  const role = useMemo(() => (player ? 'player' : coach ? 'coach' : 'unknown'), [player, coach])
+  const storedRole = (typeof window !== 'undefined' && localStorage.getItem('role')) || ''
+  const role = useMemo(() => {
+    if (storedRole) return storedRole
+    if (player) return 'player'
+    if (coach) return 'coach'
+    return 'unknown'
+  }, [storedRole, player, coach])
 
   // Sync edit forms when player data changes
   useEffect(() => {
@@ -541,6 +547,55 @@ export default function Profile() {
     return (
       <AccountLayout title={title}>
         <p className="text-sm text-rose-600">{error}</p>
+      </AccountLayout>
+    )
+  }
+
+  if (role === 'admin') {
+    return (
+      <AccountLayout title="Admin Profile">
+        <div className="space-y-4">
+          <div className="rounded-3xl bg-gradient-to-r from-orange-500/90 to-emerald-500/80 p-[1px] shadow-lg">
+            <div className="rounded-[28px] bg-white/95 p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Admin account</p>
+                  <h2 className="text-xl font-bold text-gray-900">Portal Administrator</h2>
+                  <p className="mt-1 text-sm text-gray-600">Use the quick links below to jump into admin tools.</p>
+                </div>
+                <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">Admin</span>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: 'Admin Home', to: '/admin', desc: 'Overview of internal tools' },
+                  { label: 'Users', to: '/admin/users', desc: 'Search and filter accounts' },
+                  { label: 'Verifications', to: '/admin/verifications', desc: 'Review roster submissions' },
+                ].map((item) => (
+                  <a
+                    key={item.to}
+                    href={item.to}
+                    className="group block rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-800 shadow-sm transition hover:-translate-y-[1px] hover:border-orange-200 hover:shadow-md"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-gray-900">{item.label}</span>
+                      <svg className="h-4 w-4 text-orange-500 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">{item.desc}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900">Need profile data?</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Admin accounts don’t carry player or coach profiles. To preview those experiences, sign up as a player or coach from the signup flows.
+            </p>
+          </div>
+        </div>
       </AccountLayout>
     )
   }

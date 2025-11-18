@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -20,8 +21,32 @@ import BillingSuccess from './pages/BillingSuccess'
 import BillingCanceled from './pages/BillingCanceled'
 import Billing from './pages/Billing'
 import About from './pages/About'
+import AdminHome from './pages/AdminHome'
+import AdminUsers from './pages/AdminUsers'
+import { AdminRoute } from './lib/auth'
+import FinancialDashboard from './pages/FinancialDashboard'
+import AdminVerifications from './pages/AdminVerifications'
+import AdminInvites from './pages/AdminInvites'
+import AdminAnnouncementsCMS from './pages/AdminAnnouncementsCMS'
+import AdminWebhooks from './pages/AdminWebhooks'
+import AdminAuditLog from './pages/AdminAuditLog'
+import AdminReports from './pages/AdminReports'
+import AdminSettings from './pages/AdminSettings'
+import { fetchMe, setRole, getToken } from './lib/api'
 
 export default function App() {
+  useEffect(() => {
+    const token = getToken()
+    if (!token) return
+    fetchMe()
+      .then((res) => {
+        if (res?.user?.role) setRole(res.user.role)
+      })
+      .catch(() => {
+        // ignore
+      })
+  }, [])
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-white text-gray-900">
@@ -46,6 +71,16 @@ export default function App() {
           <Route path="/players/directory" element={<PrivateRoute><PlayersDirectory /></PrivateRoute>} />
           <Route path="/players/my" element={<PrivateRoute><MyPlayers /></PrivateRoute>} />
           <Route path="/players/:playerId" element={<PrivateRoute><PlayerProfile /></PrivateRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminHome /></AdminRoute>} />
+          <Route path="/admin/verifications" element={<AdminRoute><AdminVerifications /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+          <Route path="/admin/financial" element={<AdminRoute><FinancialDashboard /></AdminRoute>} />
+          <Route path="/admin/invites" element={<AdminRoute><AdminInvites /></AdminRoute>} />
+          <Route path="/admin/announcements" element={<AdminRoute><AdminAnnouncementsCMS /></AdminRoute>} />
+          <Route path="/admin/webhooks" element={<AdminRoute><AdminWebhooks /></AdminRoute>} />
+          <Route path="/admin/audit" element={<AdminRoute><AdminAuditLog /></AdminRoute>} />
+          <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+          <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
         </Routes>
       </div>
     </BrowserRouter>

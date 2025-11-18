@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { register as apiRegister, login as apiLogin, setToken, clearToken, savePlayerProfile } from '../lib/api'
+import { register as apiRegister, login as apiLogin, setToken, setRole, clearToken, savePlayerProfile } from '../lib/api'
 import { soccerPositions } from '../lib/positions'
 import positionGraphic from '../assets/playerPosition.png'
 import PasswordField from '../components/PasswordField'
@@ -195,10 +195,12 @@ export default function SignupPlayer() {
       try {
         const reg = await apiRegister(data.email, data.password, 'player')
         setToken(reg.token)
+        setRole(reg?.user?.role || 'player')
       } catch (err) {
         if (String(err.message || '').toLowerCase().includes('already')) {
           const lg = await apiLogin(data.email, data.password)
           setToken(lg.token)
+          setRole(lg?.user?.role || 'player')
         } else {
           throw err
         }
