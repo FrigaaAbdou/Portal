@@ -93,6 +93,15 @@ export default function PlayerProfile() {
     return `${lbs} lbs`
   }, [profile])
 
+  const contactAllowed = profile?.contactAllowed ?? ((profile?.classYear && profile.classYear !== 'freshman') || profile?.contactAccess === 'authorized')
+  const contactStatus = (() => {
+    if (profile?.classYear === 'freshman') {
+      if (contactAllowed) return { label: 'Contact authorized by JUCO coach', tone: 'open' }
+      return { label: 'Contact info hidden until JUCO coach authorizes', tone: 'pending' }
+    }
+    return { label: 'Contact open', tone: 'open' }
+  })()
+
   if (!playerId) {
     return (
       <AccountLayout title="Player profile">
@@ -165,6 +174,15 @@ export default function PlayerProfile() {
           <div className="flex flex-col items-end gap-2">
             <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600">
               {profile.verificationStatus ? `Status: ${profile.verificationStatus}` : 'Not verified'}
+            </span>
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                contactStatus.tone === 'open'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {contactStatus.label}
             </span>
             <button
               type="button"
@@ -262,6 +280,25 @@ export default function PlayerProfile() {
             {profile.jucoCoachNoteUpdatedAt && (
               <p className="mt-2 text-xs text-gray-500">
                 Updated {new Date(profile.jucoCoachNoteUpdatedAt).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Contact</h2>
+            {contactAllowed && profile.user?.email ? (
+              <div className="mt-3 text-sm text-gray-800">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gray-600">Email</span>
+                  <a href={`mailto:${profile.user.email}`} className="font-semibold text-orange-600 hover:text-orange-700">
+                    {profile.user.email}
+                  </a>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">Shared because contact is authorized.</p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-gray-600">
+                Contact info is hidden until the JUCO coach authorizes outreach for this player.
               </p>
             )}
           </div>

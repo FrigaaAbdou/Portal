@@ -357,6 +357,7 @@ export default function Profile() {
     school: '',
     gpa: '',
     positionsText: '',
+    classYear: 'sophomore',
   })
   const [savingAbout, setSavingAbout] = useState(false)
   const [editingStats, setEditingStats] = useState(false)
@@ -613,6 +614,12 @@ export default function Profile() {
     const height = (p.heightFeet || p.heightInches) ? `${p.heightFeet || 0} ft ${p.heightInches || 0} in` : ''
     const weight = p.weightLbs ? `${p.weightLbs} lbs` : ''
     const canEdit = true // owner view
+    const classYearValue = p.classYear || 'sophomore'
+    const classYearLabel = (() => {
+      if (classYearValue === 'freshman') return 'Freshman'
+      if (classYearValue === 'sophomore') return 'Sophomore'
+      return classYearValue
+    })()
 
     const resetAboutForm = () => {
       setAboutForm({
@@ -627,6 +634,7 @@ export default function Profile() {
         school: p.school || '',
         gpa: p.gpa || '',
         positionsText: Array.isArray(p.positions) ? p.positions.join(', ') : '',
+        classYear: p.classYear || 'sophomore',
       })
     }
 
@@ -673,6 +681,7 @@ export default function Profile() {
           school: aboutForm.school,
           gpa: aboutForm.gpa,
           positions,
+          classYear: (aboutForm.classYear || 'sophomore'),
         }
         const updated = await savePlayerProfile(payload)
         setPlayer(updated || null)
@@ -811,6 +820,18 @@ export default function Profile() {
                     onChange={(e)=>setAboutForm(a=>({...a, gpa:e.target.value}))}
                   />
                 </label>
+                <label className="block text-sm">
+                  <span className="mb-1 block text-gray-600">Class year</span>
+                  <select
+                    className="w-full rounded-md border border-orange-200 px-3 py-2 text-sm focus:border-orange-400 focus:ring-0"
+                    value={aboutForm.classYear}
+                    onChange={(e) => setAboutForm((a) => ({ ...a, classYear: e.target.value }))}
+                  >
+                    <option value="">Select class year</option>
+                    <option value="freshman">Freshman — first year</option>
+                    <option value="sophomore">Sophomore — second year</option>
+                  </select>
+                </label>
                 <div className="sm:col-span-2 grid gap-3 sm:grid-cols-3">
                   <label className="block text-sm">
                     <span className="mb-1 block text-gray-600">Height (ft)</span>
@@ -869,6 +890,7 @@ export default function Profile() {
               <KeyValue label="Date of birth" value={p.dob ? String(p.dob).slice(0, 10) : ''} />
               <KeyValue label="School / Team" value={p.school} />
               <KeyValue label="GPA" value={p.gpa} />
+              <KeyValue label="Class year" value={classYearLabel} />
               {Array.isArray(p.positions) && p.positions.length > 0 && (
                 <div className="flex items-start justify-between gap-4">
                   <span className="text-gray-600">Positions</span>

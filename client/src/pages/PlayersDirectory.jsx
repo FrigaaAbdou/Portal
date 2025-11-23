@@ -11,6 +11,7 @@ const INITIAL_FILTERS = {
   positions: [],
   division: '',
   location: '',
+  classYear: '',
   verificationStatus: [],
   gpaMin: '',
   gpaMax: '',
@@ -47,6 +48,19 @@ function statEntries(stats = {}) {
     ['AST', 'Assists', stats.assists],
     ['PTS', 'Points', stats.points],
   ]
+}
+
+function classBadge(player = {}) {
+  if (player.classYear === 'freshman') return 'Freshman'
+  if (player.classYear === 'sophomore') return 'Sophomore'
+  return ''
+}
+
+function contactStatus(player = {}) {
+  if (player.classYear !== 'freshman') return { label: 'Contact open', tone: 'open' }
+  if (player.contactAccess === 'authorized') return { label: 'Contact authorized', tone: 'open' }
+  if (player.contactAccess === 'revoked') return { label: 'Contact revoked', tone: 'blocked' }
+  return { label: 'Contact pending', tone: 'pending' }
 }
 
 function formatBudget(budget) {
@@ -214,6 +228,18 @@ export default function PlayersDirectory() {
               {['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming','Other / International'].map((state) => (
                 <option key={state} value={state}>{state}</option>
               ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Class year</label>
+            <select
+              value={filters.classYear}
+              onChange={(e) => updateFilters({ classYear: e.target.value })}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-orange-400 focus:outline-none focus:ring-0"
+            >
+              <option value="">All classes</option>
+              <option value="freshman">Freshmen</option>
+              <option value="sophomore">Sophomores</option>
             </select>
           </div>
         </div>
@@ -418,6 +444,27 @@ export default function PlayersDirectory() {
                           <Link to={`/players/${playerId}`} className="hover:text-orange-600">{player.fullName || 'Unnamed Player'}</Link>
                         </div>
                         <div className="truncate text-xs text-gray-500">{positions}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-gray-600">
+                          {classBadge(player) && (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">
+                              {classBadge(player)}
+                            </span>
+                          )}
+                          {(() => {
+                            const status = contactStatus(player)
+                            const toneClass =
+                              status.tone === 'open'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : status.tone === 'blocked'
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : 'bg-amber-100 text-amber-700'
+                            return (
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-semibold ${toneClass}`}>
+                                {status.label}
+                              </span>
+                            )
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </td>

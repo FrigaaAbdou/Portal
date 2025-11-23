@@ -22,7 +22,7 @@ const initialData = {
   // personal
   fullName: '', dob: '', city: '', state: '', country: '', heightFeet: '', heightInches: '', weightLbs: '',
   // background
-  school: '', gpa: '',
+  school: '', gpa: '', classYear: 'freshman',
   positions: [], // multi-select
   highlightUrl1: '', highlightUrl2: '',
   // stats
@@ -35,7 +35,7 @@ function usePersistedForm(key, defaultValue) {
   const [value, setValue] = useState(() => {
     try {
       const raw = localStorage.getItem(key)
-      return raw ? JSON.parse(raw) : defaultValue
+      return raw ? { ...defaultValue, ...JSON.parse(raw) } : defaultValue
     } catch (err) {
       console.warn('Failed to read persisted form data', err)
       return defaultValue
@@ -148,13 +148,14 @@ export default function SignupPlayer() {
       ].every(Boolean)
     },
     background: () => {
-      const { school, positions, gpa, highlightUrl1, highlightUrl2 } = data
+      const { school, positions, gpa, highlightUrl1, highlightUrl2, classYear } = data
       return [
         Boolean(school?.trim()),
         Array.isArray(positions) && positions.length > 0,
         Boolean(gpa?.trim()),
         Boolean(highlightUrl1?.trim()),
         Boolean(highlightUrl2?.trim()),
+        Boolean(String(classYear || '').trim()),
       ].every(Boolean)
     },
     stats: () => {
@@ -218,6 +219,7 @@ export default function SignupPlayer() {
         weightLbs: data.weightLbs !== '' ? Number(data.weightLbs) : undefined,
         school: data.school,
         gpa: data.gpa,
+        classYear: data.classYear || 'sophomore',
         positions: data.positions || [],
         highlightUrl1: data.highlightUrl1,
         highlightUrl2: data.highlightUrl2,
@@ -268,6 +270,15 @@ export default function SignupPlayer() {
     // Background
     push('School/Team', data.school)
     push('GPA', data.gpa)
+    if (data.classYear !== undefined) {
+      const normalized = (data.classYear || 'sophomore')
+      const label = normalized === 'freshman'
+        ? 'Freshman'
+        : normalized === 'sophomore'
+          ? 'Sophomore'
+          : normalized
+      push('Class year', label)
+    }
     if (Array.isArray(data.positions) && data.positions.length) {
       push('Positions', data.positions.join(', '))
     }
@@ -391,6 +402,17 @@ export default function SignupPlayer() {
                 </Field>
                 <Field label="GPA / average grade" required>
                   <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.gpa} onChange={(e)=>update({gpa:e.target.value})} placeholder="e.g., 3.4" required />
+                </Field>
+                <Field label="Class year" required>
+                  <select
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0"
+                    value={data.classYear}
+                    onChange={(e) => update({ classYear: e.target.value })}
+                    required
+                  >
+                    <option value="freshman">Freshman — first year</option>
+                    <option value="sophomore">Sophomore — second year</option>
+                  </select>
                 </Field>
               </Section>
 

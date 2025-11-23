@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import AccountLayout from '../components/layout/AccountLayout'
-import { listMyJucoPlayers, updateJucoPlayerNote } from '../lib/api'
+import { listMyJucoPlayers, updateJucoPlayerNote, updateJucoContactAccess } from '../lib/api'
 
 function initialsFrom(name = '') {
   return String(name)
@@ -18,6 +18,7 @@ export default function MyPlayers() {
   const [editingId, setEditingId] = useState(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [saving, setSaving] = useState(false)
+  const [togglingContactId, setTogglingContactId] = useState(null)
 
   const wordsUsed = useMemo(() => noteDraft.trim().split(/\s+/).filter(Boolean).length, [noteDraft])
 
@@ -85,6 +86,32 @@ export default function MyPlayers() {
     }
   }
 
+  const contactLabel = (status) => {
+    if (status === 'authorized') return { text: 'Authorized', className: 'bg-emerald-100 text-emerald-700' }
+    if (status === 'revoked') return { text: 'Revoked', className: 'bg-rose-100 text-rose-700' }
+    return { text: 'Pending', className: 'bg-amber-100 text-amber-700' }
+  }
+
+  async function toggleContact(player, nextStatus) {
+    if (!player?._id) return
+    if (player.classYear !== 'freshman') return
+    setTogglingContactId(player._id)
+    try {
+      const res = await updateJucoContactAccess(player._id, nextStatus)
+      setPlayers((prev) =>
+        prev.map((p) =>
+          p._id === player._id
+            ? { ...p, contactAccess: res?.status || nextStatus, contactAccessUpdatedAt: res?.updatedAt || new Date().toISOString() }
+            : p
+        )
+      )
+    } catch (err) {
+      alert(err?.message || 'Failed to update contact access')
+    } finally {
+      setTogglingContactId(null)
+    }
+  }
+
   return (
     <AccountLayout title="My Players">
       <div className="space-y-4">
@@ -133,14 +160,31 @@ export default function MyPlayers() {
                 <li key={player._id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <div className="grid h-12 w-12 place-items-center rounded-full bg-orange-500 text-base font-semibold text-white">
-                        {initialsFrom(player.fullName)}
-                      </div>
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-orange-500 text-base font-semibold text-white">
+                {initialsFrom(player.fullName)}
+              </div>
                       <div>
                         <h3 className="text-sm font-semibold text-gray-900">{player.fullName || 'Player'}</h3>
                         <p className="text-xs text-gray-600">
                           {[player.school, player.city, player.state].filter(Boolean).join(' • ') || 'No school info yet'}
                         </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-gray-500">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">
+                            {player.classYear === 'freshman'
+                              ? 'Freshman'
+                              : player.classYear === 'sophomore'
+                                ? 'Sophomore'
+                                : player.classYear || 'Class year N/A'}
+                          </span>
+                          {player.classYear === 'freshman' && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 font-semibold text-gray-700 ring-1 ring-gray-200">
+                              Contact:
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${contactLabel(player.contactAccess).className}`}>
+                                {contactLabel(player.contactAccess).text}
+                              </span>
+                            </span>
+                          )}
+                        </div>
                         <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-gray-500">
                           {player.positions?.length ? (
                             <span>
@@ -208,7 +252,7 @@ export default function MyPlayers() {
                         <p className={`text-sm ${player.jucoCoachNote ? 'text-gray-800' : 'text-gray-500'}`}>
                           {player.jucoCoachNote || 'No note added yet.'}
                         </p>
-                        <div>
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={() => onEdit(player)}
@@ -216,6 +260,27 @@ export default function MyPlayers() {
                           >
                             {player.jucoCoachNote ? 'Edit note' : 'Add note'}
                           </button>
+                          {player.classYear === 'freshman' && (
+                            player.contactAccess === 'authorized' ? (
+                              <button
+                                type="button"
+                                onClick={() => toggleContact(player, 'revoked')}
+                                disabled={togglingContactId === player._id}
+                                className="inline-flex items-center gap-2 rounded-md border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {togglingContactId === player._id ? 'Updating…' : 'Revoke contact'}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => toggleContact(player, 'authorized')}
+                                disabled={togglingContactId === player._id}
+                                className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {togglingContactId === player._id ? 'Updating…' : 'Authorize contact'}
+                              </button>
+                            )
+                          )}
                         </div>
                       </div>
                     )}

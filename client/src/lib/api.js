@@ -269,6 +269,15 @@ export async function updateJucoPlayerNote(playerId, note) {
   })
 }
 
+export async function updateJucoContactAccess(playerId, status) {
+  if (!playerId) throw new Error('Player id is required')
+  return apiFetch(`/players/${playerId}/contact-authorization`, {
+    method: 'PATCH',
+    body: { status },
+    auth: true,
+  })
+}
+
 export async function createCheckoutSession(priceId) {
   const res = await apiFetch('/payments/checkout', {
     method: 'POST',
