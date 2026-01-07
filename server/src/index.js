@@ -13,8 +13,14 @@ const app = express();
 
 // Middleware
 app.use(morgan('dev'));
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN,
+  'http://localhost:5173',
+  'https://sportall.io',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || '*',
+  origin: allowedOrigins.length ? allowedOrigins : '*',
   credentials: true,
 }));
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
