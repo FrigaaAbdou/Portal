@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Sportall <no-reply@sportall.io>';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || '<no-reply@sportall.io>';
 
 let resendClient = null;
 let resendErrorLogged = false;
