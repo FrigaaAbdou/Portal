@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import AccountLayout from '../components/layout/AccountLayout'
 import { usePlayerProfile } from '../hooks/usePlayerProfile'
 import { fetchFavorites, removeFavorite, saveFavorite } from '../lib/api'
+import { notify } from '../lib/notify'
 
 function StatBlock({ label, value }) {
   if (value === undefined || value === null) return null
@@ -70,7 +71,7 @@ export default function PlayerProfile() {
         }
       }
     } catch (err) {
-      alert(err?.message || 'Failed to update favorites')
+      notify.warning(err?.message || 'Could not update favorites. Try again.')
     } finally {
       setFavLoading(false)
     }
@@ -93,13 +94,38 @@ export default function PlayerProfile() {
     return `${lbs} lbs`
   }, [profile])
 
-  const contactAllowed = profile?.contactAllowed ?? ((profile?.classYear && profile.classYear !== 'freshman') || profile?.contactAccess === 'authorized')
+  const baseContactAllowed = profile?.contactAllowed ?? ((profile?.classYear && profile.classYear !== 'freshman') || profile?.contactAccess === 'authorized')
+  const phoneVerified = Boolean(profile?.phoneVerifiedAt)
+  const contactAllowed = baseContactAllowed && phoneVerified
   const contactStatus = (() => {
     if (profile?.classYear === 'freshman') {
-      if (contactAllowed) return { label: 'Contact authorized by JUCO coach', tone: 'open' }
-      return { label: 'Contact info hidden until JUCO coach authorizes', tone: 'pending' }
+      if (!baseContactAllowed && !phoneVerified) {
+        return { label: 'Contact hidden until JUCO coach authorizes and phone is verified', tone: 'pending' }
+      }
+      if (!baseContactAllowed) return { label: 'Contact info hidden until JUCO coach authorizes', tone: 'pending' }
+      if (!phoneVerified) return { label: 'Phone verification required for contact info', tone: 'pending' }
+      return { label: 'Contact authorized by JUCO coach', tone: 'open' }
     }
+    if (!phoneVerified) return { label: 'Phone verification required for contact info', tone: 'pending' }
     return { label: 'Contact open', tone: 'open' }
+  })()
+  const contactMessage = (() => {
+    if (profile?.classYear === 'freshman') {
+      if (!baseContactAllowed && !phoneVerified) {
+        return 'Contact info is hidden until the JUCO coach authorizes outreach and the athlete verifies their phone.'
+      }
+      if (!baseContactAllowed) {
+        return 'Contact info is hidden until the JUCO coach authorizes outreach for this player.'
+      }
+      if (!phoneVerified) {
+        return 'Contact info is hidden until the athlete verifies their phone in Settings.'
+      }
+      return 'Contact info is hidden until access is authorized.'
+    }
+    if (!phoneVerified) {
+      return 'Contact info is hidden until the athlete verifies their phone in Settings.'
+    }
+    return 'Contact info is hidden until access is authorized.'
   })()
 
   if (!playerId) {
@@ -298,7 +324,7 @@ export default function PlayerProfile() {
               </div>
             ) : (
               <p className="mt-3 text-sm text-gray-600">
-                Contact info is hidden until the JUCO coach authorizes outreach for this player.
+                {contactMessage}
               </p>
             )}
           </div>

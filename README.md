@@ -1,4 +1,4 @@
-# Sportall (Portal) — Monorepo
+# Sportall — Monorepo
 
 Production-ready MERN stack with Vite + Tailwind on the client and Express/Mongoose on the server. Includes billing (Stripe), verification flows (Resend + Twilio Verify), admin tools, and role-based routing.
 
@@ -32,6 +32,12 @@ npm install
 - `CLIENT_ORIGIN` (e.g., http://localhost:5173)
 - `MONGODB_URI`
 - `JWT_SECRET`
+- `PASSWORD_MIN_LENGTH` (optional, default 8)
+- `PASSWORD_RESET_OTP_TTL_MINUTES` (optional, default 10)
+- `PASSWORD_RESET_OTP_MAX_ATTEMPTS` (optional, default 5)
+- `PASSWORD_RESET_REQUEST_WINDOW_MINUTES` (optional, default 5)
+- `PASSWORD_RESET_REQUEST_MAX` (optional, default 2)
+- `PASSWORD_RESET_TOKEN_TTL_MINUTES` (optional, default 5)
 - `STRIPE_SECRET_KEY`
 - `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_ANNUAL` (if used)
 - `STRIPE_WEBHOOK_SECRET`
@@ -76,6 +82,12 @@ Client requests to `/api/*` proxy to `http://localhost:5000` during `npm run dev
 - Admin plan: `docs/admin/admin-plan.md`
 - Brand/Design Kit: `docs/brand/brand-design-kit.pdf`
 - Consultant agreements: `docs/consultant/`
+- Notification playbook: `docs/plans/NotificationSystem.md`
+
+## Notifications (Quick Rules)
+- Inline for user-fixable issues; toast for system/global status.
+- Keep copy calm and secure (no account enumeration or technical jargon).
+- Avoid duplicates: do not show the same message inline and as a toast.
 
 ## Deployment Notes
 - Provide production env vars on your host (see server/.env list).

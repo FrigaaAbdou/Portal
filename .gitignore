@@ -12,3 +12,22 @@ pnpm-debug.log*
 .next
 .cache
 docs
+.zshrc
+
+cat >> .gitignore <<'EOF'
+
+# deps
+node_modules/
+
+# builds / caches
+dist/
+build/
+.next/
+coverage/
+.cache/
+
+# OS / misc
+.DS_Store
+*.log
+.env
+EOF

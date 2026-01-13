@@ -1,11 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
+import ForgotPasswordVerify from './pages/ForgotPasswordVerify'
+import ResetPassword from './pages/ResetPassword'
 import SignupPlayer from './pages/SignupPlayer'
 import SignupCoach from './pages/SignupCoach'
 import SignupLanding from './pages/SignupLanding'
+import SignupSuccess from './pages/SignupSuccess'
 import Pricing from './pages/Pricing'
 import { PrivateRoute, PublicOnlyRoute } from './lib/auth'
 import Profile from './pages/Profile'
@@ -54,9 +59,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={<PublicOnlyRoute><Home /></PublicOnlyRoute>} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+          <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
+          <Route path="/forgot-password/verify" element={<PublicOnlyRoute><ForgotPasswordVerify /></PublicOnlyRoute>} />
+          <Route path="/forgot-password/reset" element={<PublicOnlyRoute><ResetPassword /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><SignupLanding /></PublicOnlyRoute>} />
           <Route path="/signup/player" element={<PublicOnlyRoute><SignupPlayer /></PublicOnlyRoute>} />
           <Route path="/signup/coach" element={<PublicOnlyRoute><SignupCoach /></PublicOnlyRoute>} />
+          <Route path="/signup/success" element={<PublicOnlyRoute><SignupSuccess /></PublicOnlyRoute>} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/players" element={<Players />} />
           <Route path="/recruiters" element={<Recruiters />} />
@@ -83,6 +92,7 @@ export default function App() {
           <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
         </Routes>
       </div>
+      <Toaster position="top-right" visibleToasts={3} duration={4000} />
     </BrowserRouter>
   )
 }

@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { register as apiRegister, login as apiLogin, setToken, setRole, clearToken, savePlayerProfile } from '../lib/api'
 import { soccerPositions } from '../lib/positions'
 import positionGraphic from '../assets/playerPosition.png'
 import PasswordField from '../components/PasswordField'
+import AuthShell from '../components/layout/AuthShell'
+import logo from '../assets/logo.png'
+import playerImage from '../player-img.jpg'
 
 const steps = [
   { key: 'account', title: 'Account', desc: 'Create your account' },
@@ -15,6 +18,7 @@ const steps = [
 ]
 
 const POSITION_LIMIT = 2
+const MIN_PASSWORD_LENGTH = 8
 
 const initialData = {
   // account
@@ -123,7 +127,7 @@ export default function SignupPlayer() {
   const validators = useMemo(() => ({
     account: () => {
       const { email, password, confirmPassword, acceptTerms } = data
-      return email.includes('@') && password.length >= 6 && confirmPassword === password && acceptTerms
+      return email.includes('@') && password.length >= MIN_PASSWORD_LENGTH && confirmPassword === password && acceptTerms
     },
     personal: () => {
       const {
@@ -236,7 +240,7 @@ export default function SignupPlayer() {
       setSubmitted(true)
       // Clear auth and send user to login to sign in with the new account
       clearToken()
-      navigate('/login')
+      navigate('/signup/success?role=player')
     } catch (err) {
       setSubmitError(err.message || 'Failed to submit')
     } finally {
@@ -297,30 +301,88 @@ export default function SignupPlayer() {
     return items
   }
 
-  return (
-    <main className="min-h-[100dvh] bg-gray-50">
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Player Sign Up</h1>
-          <p className="mt-1 text-sm text-gray-600">Create your account and share your profile with recruiters.</p>
+  const side = (
+    <div className="flex h-full flex-col justify-between gap-10">
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <img src={logo} className="h-10 w-10 rounded-xl object-cover" alt="Sportall logo" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Sportall</p>
+            <p className="text-sm text-slate-600">Player onboarding</p>
+          </div>
         </div>
+        <div>
+          <h2 className="auth-display text-4xl font-semibold text-slate-900 sm:text-5xl">
+            Build a profile recruiters trust.
+          </h2>
+          <p className="mt-3 text-sm text-slate-600">
+            Complete each step to unlock verified status, showcase highlights, and receive outreach.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/70 shadow-sm backdrop-blur">
+          <img src={playerImage} alt="Player profile preview" className="h-44 w-full object-cover" />
+          <div className="space-y-3 p-4">
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>Profile preview</span>
+              <span className="rounded-full bg-orange-100 px-2 py-0.5 font-semibold text-orange-700">Freshman</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              {[
+                { label: 'GPA', value: '3.6' },
+                { label: 'Goals', value: '12' },
+                { label: 'Assists', value: '8' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl bg-slate-50 px-2 py-2">
+                  <p className="text-[10px] uppercase tracking-wide text-slate-400">{item.label}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            { title: 'Verified pathway', desc: 'Confirm your email to start. Phone verification can be added later.' },
+            { title: 'Recruiter visibility', desc: 'Be discovered through targeted filters.' },
+            { title: 'Highlight reels', desc: 'Showcase clips with external links.' },
+            { title: 'Privacy controls', desc: 'JUCO approvals protect contact access.' },
+          ].map((item) => (
+            <div key={item.title} className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur">
+              <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+              <p className="mt-1 text-xs text-slate-600">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-2xl border border-orange-200/60 bg-orange-50/80 p-4 text-xs text-orange-700 shadow-sm">
+        Tip: Have your highlight URLs ready before you begin so you can finish in one pass.
+      </div>
+    </div>
+  )
 
+  return (
+    <AuthShell
+      title="Player sign up"
+      subtitle="Create your account and share your profile with recruiters."
+      side={side}
+    >
+      <div className="space-y-6">
         <Stepper current={step} />
 
-        <form onSubmit={onSubmit} className="rounded-2xl bg-white p-6 pb-24 shadow-sm ring-1 ring-gray-200 sm:pb-6">
+        <form onSubmit={onSubmit} className="space-y-8 pb-24 sm:pb-6">
           {step === 0 && (
             <Section title="Account creation" desc="Use a valid email and a strong password.">
               <Field label="Email" required>
                 <input type="email" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0" value={data.email} onChange={(e)=>update({email:e.target.value})} required />
               </Field>
-              <Field label="Password (min 6)" required>
+              <Field label={`Password (min ${MIN_PASSWORD_LENGTH})`} required>
                 <PasswordField
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0"
                   value={data.password}
                   onChange={(e) => update({ password: e.target.value })}
                   required
                   autoComplete="new-password"
-                  placeholder="Minimum 6 characters"
+                  placeholder={`Minimum ${MIN_PASSWORD_LENGTH} characters`}
                 />
               </Field>
               <Field label="Confirm password" required>
@@ -586,17 +648,20 @@ export default function SignupPlayer() {
               <button type="submit" disabled={submitting} className="rounded-md bg-orange-500 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50">{submitting ? 'Submitting…' : 'Submit'}</button>
             )}
           </div>
+          <div className="pt-4 text-center text-xs text-slate-600">
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-orange-600 hover:text-orange-700">Log in</Link>
+          </div>
         </form>
       </div>
 
-      {/* Mobile sticky nav */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
         <div className="mx-auto flex max-w-3xl gap-3 px-4">
           <button
             type="button"
             onClick={back}
             disabled={step===0}
-            className="w-1/2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 disabled:opacity-40"
+            className="w-1/2 rounded-md border border-slate-300 px-4 py-3 text-sm font-medium text-slate-900 disabled:opacity-40"
           >
             Back
           </button>
@@ -622,6 +687,6 @@ export default function SignupPlayer() {
           )}
         </div>
       </div>
-    </main>
+    </AuthShell>
   )
 }

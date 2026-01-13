@@ -39,6 +39,18 @@ Hit `http://localhost:5001/api/health` and `http://localhost:5173/` to verify.
 - `docker-compose` suggestion: services for `api` (port 5001), `client` (5173), and `mongo` (27017). Mount source for hot reload in dev.
 - Health checks: `curl http://api:5001/api/health` and `curl http://client:5173/`.
 
+## Notification Playbook (Sonner + Inline)
+- Inline for errors the user can fix on the current screen.
+- Toast for system/global events (network, session expired, background saves).
+- Keep copy calm, short, and non-technical.
+- Never leak auth/account existence details.
+
+## Feature Checklist (Notifications)
+- Choose the correct lane (inline vs toast).
+- Use approved calm/secure copy.
+- Avoid duplicate messages on the same action.
+- Limit toast volume (no spam, dedupe where possible).
+
 ## Quick reset script (manual steps)
 ```bash
 nvm use 20

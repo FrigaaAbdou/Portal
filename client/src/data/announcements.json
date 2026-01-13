@@ -37,7 +37,7 @@
     "audienceTags": ["player", "juco_coach"],
     "publishedAt": "2024-06-08T09:15:00.000Z",
     "cta": {
-      "label": "Apply via Portal",
+      "label": "Apply via Sportall",
       "url": "https://example.com/lakeside-apply"
     }
   },
@@ -45,7 +45,7 @@
     "id": "prod-2024-05-roster-sync",
     "type": "product_update",
     "title": "Roster sync now links JUCO notes automatically",
-    "summary": "When your players list your program, Portal keeps notes in sync across JUCO staff accounts with instant updates.",
+    "summary": "When your players list your program, Sportall keeps notes in sync across JUCO staff accounts with instant updates.",
     "audienceTags": ["juco_coach", "staff"],
     "publishedAt": "2024-05-28T13:00:00.000Z",
     "cta": {
@@ -69,7 +69,7 @@
     "id": "sponsor-2024-05-gear-partner",
     "type": "sponsor_spotlight",
     "title": "ProFit gear discount for verified athletes",
-    "summary": "Verified Portal players get 20% off the ProFit summer training kit until July 15.",
+    "summary": "Verified Sportall players get 20% off the ProFit summer training kit until July 15.",
     "audienceTags": ["player"],
     "publishedAt": "2024-05-18T11:20:00.000Z",
     "cta": {

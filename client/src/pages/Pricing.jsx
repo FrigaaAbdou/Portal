@@ -238,7 +238,7 @@ export default function Pricing() {
               },
               {
                 q: 'Is payment information secure?',
-                a: 'All transactions are processed via Stripe. We never store full card numbers or sensitive billing data on Portal servers.',
+                a: 'All transactions are processed via Stripe. We never store full card numbers or sensitive billing data on Sportall servers.',
               },
               {
                 q: 'What happens after I subscribe?',

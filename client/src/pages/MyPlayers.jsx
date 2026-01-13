@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import AccountLayout from '../components/layout/AccountLayout'
 import { listMyJucoPlayers, updateJucoPlayerNote, updateJucoContactAccess } from '../lib/api'
+import { notify } from '../lib/notify'
 
 function initialsFrom(name = '') {
   return String(name)
@@ -106,7 +107,7 @@ export default function MyPlayers() {
         )
       )
     } catch (err) {
-      alert(err?.message || 'Failed to update contact access')
+      notify.warning(err?.message || 'Could not update contact access. Try again.')
     } finally {
       setTogglingContactId(null)
     }

@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { register as apiRegister, login as apiLogin, setToken, setRole, clearToken, saveCoachProfile } from '../lib/api'
 import PasswordField from '../components/PasswordField'
 import PhoneInput from '../components/ui/PhoneInput'
+import AuthShell from '../components/layout/AuthShell'
+import logo from '../assets/logo.png'
+import coachImage from '../coach-img.jpg'
 const JUCO_LEAGUES = ['NJCAA', 'CCCAA', 'NWAC', 'Other']
 const DIVISION_OPTIONS = ['NCAA D1', 'NCAA D2', 'NCAA D3', 'NAIA', 'NJCAA']
 const BUDGET_OPTIONS = ['<$5k', '$5k-$10k', '$10k-$20k', '$20k-$40k', '>$40k']
+const MIN_PASSWORD_LENGTH = 8
 
 const initialData = {
   coachType: '',
@@ -139,7 +143,7 @@ export default function SignupCoach() {
     role: () => data.coachType === 'JUCO' || data.coachType === 'NCAA',
     account: () => {
       const { email, password, confirmPassword, firstName, lastName, phone, roleTitle, acceptTerms } = data
-      return email.includes('@') && password.length >= 6 && confirmPassword === password && firstName.trim() && lastName.trim() && phone.trim() && roleTitle && acceptTerms
+      return email.includes('@') && password.length >= MIN_PASSWORD_LENGTH && confirmPassword === password && firstName.trim() && lastName.trim() && phone.trim() && roleTitle && acceptTerms
     },
     program: () => {
       if (data.coachType === 'JUCO') {
@@ -227,7 +231,7 @@ export default function SignupCoach() {
       if (profile) {
         setSubmitted(true)
         clearToken()
-        navigate('/login')
+        navigate('/signup/success?role=coach')
       }
     } catch (err) {
       setSubmitError(err.message || 'Failed to submit')
@@ -236,17 +240,75 @@ export default function SignupCoach() {
     }
   }
 
-  return (
-    <main className="min-h-[100dvh] bg-gray-50">
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Coach Sign Up</h1>
-          <p className="mt-1 text-sm text-gray-600">Create your account and configure your program details.</p>
+  const side = (
+    <div className="flex h-full flex-col justify-between gap-10">
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <img src={logo} className="h-10 w-10 rounded-xl object-cover" alt="Sportall logo" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Sportall</p>
+            <p className="text-sm text-slate-600">Coach onboarding</p>
+          </div>
         </div>
+        <div>
+          <h2 className="auth-display text-4xl font-semibold text-slate-900 sm:text-5xl">
+            Recruit with clarity.
+          </h2>
+          <p className="mt-3 text-sm text-slate-600">
+            Set your program profile, define priorities, and start evaluating player talent.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/70 shadow-sm backdrop-blur">
+          <img src={coachImage} alt="Coach profile preview" className="h-44 w-full object-cover" />
+          <div className="space-y-3 p-4 text-xs text-slate-600">
+            <div className="flex items-center justify-between">
+              <span>Program snapshot</span>
+              <span className="rounded-full bg-orange-100 px-2 py-0.5 font-semibold text-orange-700">Recruiter</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {[
+                { label: 'Needs', value: '3 roles' },
+                { label: 'Budget', value: '$10k+' },
+                { label: 'Region', value: 'Midwest' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl bg-slate-50 px-2 py-2">
+                  <p className="text-[10px] uppercase tracking-wide text-slate-400">{item.label}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            { title: 'JUCO collaboration', desc: 'Exchange verified notes with two-year programs.' },
+            { title: 'Targeted searches', desc: 'Filter by GPA, budget, and division.' },
+            { title: 'Favorites workflow', desc: 'Track prospects and notes in one place.' },
+            { title: 'Admin visibility', desc: 'Keep roster activity accountable.' },
+          ].map((item) => (
+            <div key={item.title} className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur">
+              <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+              <p className="mt-1 text-xs text-slate-600">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-2xl border border-orange-200/60 bg-orange-50/80 p-4 text-xs text-orange-700 shadow-sm">
+        Tip: Have your program details and recruiting priorities ready to finish faster.
+      </div>
+    </div>
+  )
 
+  return (
+    <AuthShell
+      title="Coach sign up"
+      subtitle="Create your account and configure your program details."
+      side={side}
+    >
+      <div className="space-y-6">
         <Stepper current={step} steps={steps} />
 
-        <form onSubmit={onSubmit} className="rounded-2xl bg-white p-6 pb-24 shadow-sm ring-1 ring-gray-200 sm:pb-6">
+        <form onSubmit={onSubmit} className="space-y-8 pb-24 sm:pb-6">
           {stepKey === 'role' && (
             <div className="grid gap-4 md:grid-cols-2">
               <CoachTypeCard
@@ -276,7 +338,7 @@ export default function SignupCoach() {
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:ring-0"
                   value={data.password}
                   onChange={(e) => update({ password: e.target.value })}
-                  placeholder="Minimum 6 characters"
+                  placeholder={`Minimum ${MIN_PASSWORD_LENGTH} characters`}
                   required
                   autoComplete="new-password"
                 />
@@ -414,16 +476,20 @@ export default function SignupCoach() {
               <button type="submit" className="rounded-md bg-orange-500 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit'}</button>
             )}
           </div>
+          <div className="pt-4 text-center text-xs text-slate-600">
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-orange-600 hover:text-orange-700">Log in</Link>
+          </div>
         </form>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
         <div className="mx-auto flex max-w-3xl gap-3 px-4">
           <button
             type="button"
             onClick={back}
             disabled={step===0}
-            className="w-1/2 rounded-md border border-gray-300 px-4 py-3 text-sm font-medium text-gray-900 disabled:opacity-40"
+            className="w-1/2 rounded-md border border-slate-300 px-4 py-3 text-sm font-medium text-slate-900 disabled:opacity-40"
           >
             Back
           </button>
@@ -448,6 +514,6 @@ export default function SignupCoach() {
           )}
         </div>
       </div>
-    </main>
+    </AuthShell>
   )
 }

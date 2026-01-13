@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 import AccountLayout from '../components/layout/AccountLayout'
 import { getMyPlayerProfile, getMyCoachProfile, savePlayerProfile, saveCoachProfile, listMyJucoPlayers } from '../lib/api'
+import { notify } from '../lib/notify'
 import VerificationDialog from '../components/verification/VerificationDialog'
 
 function SectionCard({ title, subtitle, icon: Icon, children, canEdit = false, onEdit, className = '' }) {
@@ -561,7 +562,7 @@ export default function Profile() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Admin account</p>
-                  <h2 className="text-xl font-bold text-gray-900">Portal Administrator</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Sportall Administrator</h2>
                   <p className="mt-1 text-sm text-gray-600">Use the quick links below to jump into admin tools.</p>
                 </div>
                 <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">Admin</span>
@@ -687,7 +688,7 @@ export default function Profile() {
         setPlayer(updated || null)
         setEditingAbout(false)
       } catch (e) {
-        alert(e?.message || 'Failed to save')
+        notify.warning(e?.message || 'Could not save. Try again.')
       } finally {
         setSavingAbout(false)
       }
@@ -701,7 +702,7 @@ export default function Profile() {
         setPlayer(updated || null)
         setEditingStats(false)
       } catch (e) {
-        alert(e?.message || 'Failed to save')
+        notify.warning(e?.message || 'Could not save. Try again.')
       } finally {
         setSavingStats(false)
       }
@@ -714,7 +715,7 @@ export default function Profile() {
         setPlayer(updated || null)
         setEditingPrefs(false)
       } catch (e) {
-        alert(e?.message || 'Failed to save')
+        notify.warning(e?.message || 'Could not save. Try again.')
       } finally {
         setSavingPrefs(false)
       }
@@ -1058,7 +1059,7 @@ export default function Profile() {
       setCoach(updated || null)
       setEditingCoachAbout(false)
     } catch (e) {
-      alert(e?.message || 'Failed to save')
+      notify.warning(e?.message || 'Could not save. Try again.')
     } finally {
       setSavingCoachAbout(false)
     }
@@ -1080,7 +1081,7 @@ export default function Profile() {
       setCoach(updated || null)
       setEditingCoachPrefs(false)
     } catch (e) {
-      alert(e?.message || 'Failed to save')
+      notify.warning(e?.message || 'Could not save. Try again.')
     } finally {
       setSavingCoachPrefs(false)
     }
@@ -1363,7 +1364,7 @@ export default function Profile() {
                     <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-5 text-sm text-amber-800">
                       <p className="font-semibold">No players linked yet</p>
                       <p className="mt-1">
-                        Ask your athletes to list <span className="font-semibold">{c.jucoProgram || 'your JUCO program'}</span> when they create their Portal profile and they’ll appear here automatically.
+                        Ask your athletes to list <span className="font-semibold">{c.jucoProgram || 'your JUCO program'}</span> when they create their Sportall profile and they’ll appear here automatically.
                       </p>
                     </div>
                   ) : (

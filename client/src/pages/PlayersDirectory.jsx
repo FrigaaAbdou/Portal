@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import AccountLayout from '../components/layout/AccountLayout'
 import { searchPlayers, fetchFavorites, saveFavorite, removeFavorite } from '../lib/api'
 import { soccerPositions } from '../lib/positions'
+import { notify } from '../lib/notify'
 
 const INITIAL_FILTERS = {
   search: '',
@@ -168,7 +169,7 @@ export default function PlayersDirectory() {
       }
     } catch (err) {
       console.error(err)
-      alert(err?.message || 'Failed to update favorites')
+      notify.warning(err?.message || 'Could not update favorites. Try again.')
     }
   }
 

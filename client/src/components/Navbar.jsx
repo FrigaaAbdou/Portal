@@ -73,9 +73,9 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Left: Logo + Brand */}
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="Portal Soccer logo" className="h-8 w-8 rounded-full object-cover" />
-          <span className="text-lg font-semibold tracking-tight sm:hidden">Portal</span>
-          <span className="hidden text-lg font-semibold tracking-tight sm:inline">Portal Soccer</span>
+          <img src={logo} alt="Sportall Soccer logo" className="h-8 w-8 rounded-full object-cover" />
+          <span className="text-lg font-semibold tracking-tight sm:hidden">Sportall</span>
+          <span className="hidden text-lg font-semibold tracking-tight sm:inline">Sportall Soccer</span>
         </Link>
 
         {/* Mobile menu button */}

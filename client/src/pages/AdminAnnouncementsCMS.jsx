@@ -6,6 +6,7 @@ import {
   listAdminAnnouncements,
   updateAdminAnnouncement,
 } from '../lib/api'
+import { notify } from '../lib/notify'
 
 const TYPES = [
   { label: 'Product update', value: 'product_update' },
@@ -95,7 +96,7 @@ export default function AdminAnnouncementsCMS() {
       await deleteAdminAnnouncement(id)
       await load()
     } catch (err) {
-      alert(err?.message || 'Delete failed')
+      notify.warning(err?.message || 'Could not delete. Try again.')
     }
   }
 
@@ -121,7 +122,7 @@ export default function AdminAnnouncementsCMS() {
       resetForm()
       await load()
     } catch (err) {
-      alert(err?.message || 'Save failed')
+      notify.warning(err?.message || 'Could not save. Try again.')
     } finally {
       setSaving(false)
     }

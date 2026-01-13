@@ -75,7 +75,7 @@ export default function Billing() {
       if (url) {
         window.location.href = url
       } else {
-        throw new Error('Portal link missing')
+        throw new Error('Sportall link missing')
       }
     } catch (err) {
       setPortalError(err?.message || 'Failed to open billing portal')
@@ -115,7 +115,7 @@ export default function Billing() {
           <p className="mt-1 text-base font-semibold text-gray-900">billing@sportall.app</p>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Portal link</p>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Sportall link</p>
           <p className="mt-1 text-xs text-gray-500">Open Stripe portal to download invoices or update cards.</p>
         </div>
       </div>

@@ -1,15 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import PhoneInput from '../ui/PhoneInput'
+import { Link } from 'react-router-dom'
 import {
   fetchVerificationStatus,
   startEmailVerification,
   confirmEmailVerification,
-  sendPhoneVerification,
-  confirmPhoneVerification,
   submitVerificationStats,
 } from '../../lib/api'
-
-const STEP_ORDER = ['email_pending', 'phone_pending', 'stats_pending', 'in_review', 'verified', 'needs_updates', 'none']
 
 function statusToStep(status = 'none') {
   switch (status) {
@@ -17,24 +13,22 @@ function statusToStep(status = 'none') {
     case 'none':
       return 0
     case 'phone_pending':
-      return 1
     case 'stats_pending':
     case 'needs_updates':
-      return 2
+      return 1
     case 'in_review':
-      return 3
     case 'verified':
-      return 4
+      return 2
     default:
       return 0
   }
 }
 
 function StepBadge({ step, current }) {
-  const states = ['Email', 'Phone', 'Stats']
+  const states = ['Email', 'Stats', 'Review']
   const state = states[step]
   const done = step < current
-  const active = step === current && current < 3
+  const active = step === current && current < states.length
   return (
     <div className="flex items-center gap-2 text-sm">
       <span
@@ -53,17 +47,12 @@ export default function VerificationDialog({ open, onClose, player }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('none')
+  const [phoneVerifiedAt, setPhoneVerifiedAt] = useState(null)
 
   const [emailCode, setEmailCode] = useState('')
   const [emailSending, setEmailSending] = useState(false)
   const [emailConfirming, setEmailConfirming] = useState(false)
   const [emailCooldown, setEmailCooldown] = useState(0)
-
-  const [phoneValue, setPhoneValue] = useState('')
-  const [phoneCode, setPhoneCode] = useState('')
-  const [phoneSending, setPhoneSending] = useState(false)
-  const [phoneConfirming, setPhoneConfirming] = useState(false)
-  const [phoneCooldown, setPhoneCooldown] = useState(0)
 
   const [statsForm, setStatsForm] = useState({
     attested: false,
@@ -80,9 +69,7 @@ export default function VerificationDialog({ open, onClose, player }) {
         if (!active) return
         const verification = res?.verification || null
         setStatus(verification?.status || 'none')
-        if (verification?.phone?.number) {
-          setPhoneValue(res.verification.phone.number)
-        }
+        setPhoneVerifiedAt(res?.phoneVerifiedAt || verification?.phone?.verifiedAt || null)
       })
       .catch((err) => {
         if (active) setError(err?.message || 'Failed to load verification')
@@ -98,17 +85,16 @@ export default function VerificationDialog({ open, onClose, player }) {
   useEffect(() => {
     if (!open) {
       setEmailCooldown(0)
-      setPhoneCooldown(0)
       return
     }
     const interval = setInterval(() => {
       setEmailCooldown((prev) => (prev > 0 ? prev - 1 : 0))
-      setPhoneCooldown((prev) => (prev > 0 ? prev - 1 : 0))
     }, 1000)
     return () => clearInterval(interval)
   }, [open])
 
   const currentStep = useMemo(() => statusToStep(status), [status])
+  const emailStarted = status !== 'none'
 
   const handleSendEmail = async () => {
     setEmailSending(true)
@@ -132,45 +118,13 @@ export default function VerificationDialog({ open, onClose, player }) {
     setEmailConfirming(true)
     setError('')
     try {
-      await confirmEmailVerification(emailCode)
-      setStatus('phone_pending')
+      const res = await confirmEmailVerification(emailCode)
+      setStatus(res?.next || 'stats_pending')
       setEmailCode('')
     } catch (err) {
       setError(err?.message || 'Invalid code')
     } finally {
       setEmailConfirming(false)
-    }
-  }
-
-  const handleSendPhone = async () => {
-    setPhoneSending(true)
-    setError('')
-    try {
-      await sendPhoneVerification(phoneValue)
-      setStatus('phone_pending')
-      setPhoneCooldown(60)
-    } catch (err) {
-      setError(err?.message || 'Failed to send SMS')
-      if (err?.status === 429) {
-        const retry = err?.data?.retryAfter ? Number(err.data.retryAfter) : 60
-        setPhoneCooldown(retry)
-      }
-    } finally {
-      setPhoneSending(false)
-    }
-  }
-
-  const handleConfirmPhone = async () => {
-    setPhoneConfirming(true)
-    setError('')
-    try {
-      await confirmPhoneVerification(phoneCode)
-      setStatus('stats_pending')
-      setPhoneCode('')
-    } catch (err) {
-      setError(err?.message || 'Invalid SMS code')
-    } finally {
-      setPhoneConfirming(false)
     }
   }
 
@@ -227,12 +181,13 @@ export default function VerificationDialog({ open, onClose, player }) {
             </button>
           </div>
           <div className="px-5 py-4">
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               {[0, 1, 2].map((step) => (
-                <StepBadge key={step} step={step} current={Math.min(currentStep, 3)} />
+                <StepBadge key={step} step={step} current={Math.min(currentStep, 2)} />
               ))}
-              <div className="ml-auto text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Status: {status.replace('_', ' ')}
+              <div className="ml-auto flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <span>Status: {status.replace('_', ' ')}</span>
+                <span>Phone: {phoneVerifiedAt ? 'verified' : 'optional'}</span>
               </div>
             </div>
             {loading ? (
@@ -246,7 +201,11 @@ export default function VerificationDialog({ open, onClose, player }) {
                 )}
                 {currentStep === 0 && (
                   <div className="mt-4 space-y-4">
-                    <p className="text-sm text-gray-600">We’ve sent a code to your account email. Didn’t get it?</p>
+                    <p className="text-sm text-gray-600">
+                      {emailStarted
+                        ? 'We’ve sent a code to your account email. Didn’t get it?'
+                        : 'Send a code to your account email to get started.'}
+                    </p>
                     <div className="flex gap-3">
                       <button
                         type="button"
@@ -254,7 +213,7 @@ export default function VerificationDialog({ open, onClose, player }) {
                         disabled={emailSending || emailCooldown > 0}
                         className="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-60"
                       >
-                        {emailSending ? 'Sending…' : 'Resend code'}
+                        {emailSending ? 'Sending…' : emailStarted ? 'Resend code' : 'Send code'}
                       </button>
                       {emailCooldown > 0 && (
                         <span className="text-xs text-gray-500 self-center">{emailCooldown}s before retry</span>
@@ -283,43 +242,15 @@ export default function VerificationDialog({ open, onClose, player }) {
                 )}
                 {currentStep === 1 && (
                   <div className="mt-4 space-y-4">
-                    <PhoneInput value={phoneValue} onChange={setPhoneValue} label="Mobile number" required />
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={handleSendPhone}
-                        disabled={phoneSending || !phoneValue || phoneCooldown > 0}
-                        className="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-60"
-                      >
-                        {phoneSending ? 'Sending…' : 'Send SMS code'}
-                      </button>
-                      {phoneCooldown > 0 && (
-                        <span className="text-xs text-gray-500 self-center">{phoneCooldown}s before retry</span>
-                      )}
+                    <div className="rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-orange-700">
+                      <p className="font-semibold text-orange-800">Phone verification is optional</p>
+                      <p className="mt-1 text-xs text-orange-700">
+                        Verify later to unlock direct contact features and boost recruiter trust.
+                        <Link to="/settings" className="ml-1 font-semibold underline">
+                          Verify later
+                        </Link>
+                      </p>
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Enter SMS code</label>
-                      <input
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-orange-400 focus:ring-0"
-                        value={phoneCode}
-                        onChange={(e) => setPhoneCode(e.target.value)}
-                        placeholder="123456"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={handleConfirmPhone}
-                        disabled={phoneConfirming || phoneCode.length === 0}
-                        className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 disabled:opacity-60"
-                      >
-                        {phoneConfirming ? 'Verifying…' : 'Confirm phone'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {currentStep === 2 && (
-                  <div className="mt-4 space-y-4">
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
                       <p className="font-semibold text-gray-900">Stats snapshot</p>
                       <ul className="mt-2 grid gap-1 text-sm text-gray-600">
@@ -336,7 +267,7 @@ export default function VerificationDialog({ open, onClose, player }) {
                         checked={statsForm.attested}
                         onChange={(e) => setStatsForm((prev) => ({ ...prev, attested: e.target.checked }))}
                       />
-                      <span>I certify that the stats above are accurate and can be reviewed by Portal staff.</span>
+                      <span>I certify that the stats above are accurate and can be reviewed by Sportall staff.</span>
                     </label>
                     <label className="block text-sm text-gray-700">
                       <span className="font-medium">Supporting file URLs (optional)</span>
@@ -360,7 +291,7 @@ export default function VerificationDialog({ open, onClose, player }) {
                     </div>
                   </div>
                 )}
-                {currentStep >= 3 && (
+                {currentStep >= 2 && (
                   <div className="mt-4 space-y-3 text-sm text-gray-700">
                     {status === 'in_review' && (
                       <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">

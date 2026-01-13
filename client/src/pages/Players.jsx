@@ -27,7 +27,7 @@ const profileHighlights = [
   {
     title: 'Verified badges',
     Icon: ShieldCheckIcon,
-    description: 'Progress through Sportall verification—email, phone, stats—to unlock recruiter-only filters.',
+    description: 'Progress through Sportall verification—email, stats, and optional phone—to unlock recruiter-only filters.',
   },
 ]
 

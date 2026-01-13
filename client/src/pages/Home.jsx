@@ -34,7 +34,7 @@ export default function Home() {
               <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Built for every role</span>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">One platform, three winning experiences</h2>
               <p className="mx-auto mt-4 max-w-3xl text-sm text-gray-600 sm:text-base">
-                Portal empowers players, JUCO coaches, and NCAA/NAIA recruiters with workflows tailored to their goals. Shared data keeps everyone aligned.
+                Sportall empowers players, JUCO coaches, and NCAA/NAIA recruiters with workflows tailored to their goals. Shared data keeps everyone aligned.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
@@ -148,7 +148,7 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-6">
             <div className="flex flex-col items-center gap-10 md:flex-row md:items-end md:justify-between">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">Why coaches trust Portal</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-orange-500">Why coaches trust Sportall</span>
                 <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Verified profiles, faster decisions</h2>
                 <p className="mt-3 max-w-xl text-sm text-gray-200 sm:text-base">
                   JUCO evaluations and NCAA-eligible status give recruiters confidence. Players stay in control of their journey while coaches save hours each week.
@@ -179,7 +179,7 @@ export default function Home() {
               <span className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">Why it works</span>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Tools that respect the process</h2>
               <p className="mt-3 max-w-3xl text-sm text-gray-600 sm:text-base">
-                Portal blends athlete storytelling, JUCO validation, and recruiter efficiency into one collaborative hub with clear ownership at every step.
+                Sportall blends athlete storytelling, JUCO validation, and recruiter efficiency into one collaborative hub with clear ownership at every step.
               </p>
             </div>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -225,7 +225,7 @@ export default function Home() {
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[
                 {
-                  quote: 'Portal gave me the structure to present myself professionally. Within weeks I had three coaches ask for film.',
+                  quote: 'Sportall gave me the structure to present myself professionally. Within weeks I had three coaches ask for film.',
                   name: 'Jaylen M.',
                   role: 'Wide Receiver, 2024 class',
                 },
@@ -259,7 +259,7 @@ export default function Home() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Ready to move faster this season?</h2>
               <p className="mt-2 text-sm text-emerald-100 sm:text-base">
-                Join thousands of athletes and coaches already transforming their recruiting workflow with Portal.
+                Join thousands of athletes and coaches already transforming their recruiting workflow with Sportall.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -296,7 +296,7 @@ export default function Home() {
                 },
                 {
                   q: 'Can JUCO coaches invite their roster?',
-                  a: 'Absolutely. Upload your roster, complete evaluations, and Portal will automatically notify four-year programs once athletes are marked NCAA-eligible.',
+                  a: 'Absolutely. Upload your roster, complete evaluations, and Sportall will automatically notify four-year programs once athletes are marked NCAA-eligible.',
                 },
                 {
                   q: 'What information do recruiters see?',
@@ -304,7 +304,7 @@ export default function Home() {
                 },
                 {
                   q: 'Do you support international athletes?',
-                  a: 'Yes. Portal helps international players surface academic and visa readiness, and highlights programs actively recruiting abroad.',
+                  a: 'Yes. Sportall helps international players surface academic and visa readiness, and highlights programs actively recruiting abroad.',
                 },
               ].map(({ q, a }) => (
                 <details key={q} className="group rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm">

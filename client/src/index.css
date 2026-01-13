@@ -1,7 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html {
   scroll-behavior: smooth;
+}
+
+:root {
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+}
+
+.auth-shell {
+  font-family: var(--font-body);
+}
+
+.auth-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.auth-shell input[type='text'],
+.auth-shell input[type='email'],
+.auth-shell input[type='password'],
+.auth-shell input[type='number'],
+.auth-shell input[type='url'],
+.auth-shell input[type='date'],
+.auth-shell input[type='search'],
+.auth-shell select,
+.auth-shell textarea {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.auth-shell input[type='text']:focus,
+.auth-shell input[type='email']:focus,
+.auth-shell input[type='password']:focus,
+.auth-shell input[type='number']:focus,
+.auth-shell input[type='url']:focus,
+.auth-shell input[type='date']:focus,
+.auth-shell input[type='search']:focus,
+.auth-shell select:focus,
+.auth-shell textarea:focus {
+  outline: none;
+  border-color: #fb923c;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+@keyframes auth-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-fade {
+  animation: auth-fade-up 600ms ease-out both;
+}
+
+.auth-fade-delay-1 {
+  animation-delay: 120ms;
+}
+
+.auth-fade-delay-2 {
+  animation-delay: 240ms;
 }
