@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import {
   AdjustmentsHorizontalIcon,
@@ -11,6 +12,7 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
 import { ShieldCheck } from 'lucide-react'
+import { toPng } from 'html-to-image'
 import AccountLayout from '../components/layout/AccountLayout'
 import {
   getMyPlayerProfile,
@@ -22,6 +24,7 @@ import {
 } from '../lib/api'
 import { notify } from '../lib/notify'
 import VerificationDialog from '../components/verification/VerificationDialog'
+import PlayerShareCard from '../components/share-card/PlayerShareCard'
 
 function SectionCard({ title, subtitle, icon: Icon, children, canEdit = false, onEdit, className = '' }) {
   return (
@@ -105,6 +108,7 @@ function HeaderPanel({
   verified = false,
   onChangePhoto,
   onChangeCover,
+  onShareCard,
   photoUploading = false,
   coverUploading = false,
   photoProgress,
@@ -147,7 +151,7 @@ function HeaderPanel({
             </div>
             {subtitle && <p className="mt-1 text-sm text-gray-600">{subtitle}</p>}
           </div>
-          {(onChangePhoto || onChangeCover) && (
+          {(onChangePhoto || onChangeCover || onShareCard) && (
             <div className="flex gap-2 text-xs">
               {onChangePhoto && (
                 <button
@@ -167,6 +171,15 @@ function HeaderPanel({
                   className="rounded-md border border-emerald-200 bg-white px-3 py-1.5 font-medium text-emerald-600 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {coverUploading ? `Uploading…${typeof coverProgress === 'number' ? ` ${coverProgress}%` : ''}` : 'Change Cover'}
+                </button>
+              )}
+              {onShareCard && (
+                <button
+                  type="button"
+                  onClick={onShareCard}
+                  className="rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm transition hover:bg-orange-600"
+                >
+                  Share Card
                 </button>
               )}
             </div>
@@ -330,6 +343,145 @@ function HighlightsSection({ urls, onSaved }) {
   )
 }
 
+function ShareCardDrawer({ open, onClose, player }) {
+  const cardRef = useRef(null)
+  const [downloading, setDownloading] = useState(false)
+  const [error, setError] = useState('')
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const previewScale = 0.35
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true)
+      requestAnimationFrame(() => setVisible(true))
+    } else {
+      setVisible(false)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (open || !mounted) return undefined
+    const timer = setTimeout(() => setMounted(false), 300)
+    return () => clearTimeout(timer)
+  }, [open, mounted])
+
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose?.()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  const handleDownload = async () => {
+    if (!cardRef.current || downloading) return
+    setDownloading(true)
+    setError('')
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+      })
+      const link = document.createElement('a')
+      link.download = 'sportall-share-card.png'
+      link.href = dataUrl
+      link.click()
+      notify.success('Share card downloaded')
+    } catch (err) {
+      setError('Could not generate the share card. Try again.')
+      notify.warning('Could not generate the share card. Try again.')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  if (!mounted) return null
+
+  return createPortal(
+    <>
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 ${visible ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+        onClick={() => onClose?.()}
+      />
+      <aside
+        className={`fixed right-0 top-0 z-50 flex h-[100dvh] w-[520px] max-w-[95vw] flex-col border-l border-gray-200 bg-white shadow-2xl transition-transform duration-300 ease-out will-change-transform ${
+          visible ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Share Card</h2>
+            <p className="mt-1 text-xs text-gray-500">Download and post anywhere.</p>
+          </div>
+          <button
+            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Close share card"
+            onClick={() => onClose?.()}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-5">
+          <div className="grid gap-5">
+            <div className="rounded-xl border border-orange-100 bg-orange-50/60 px-4 py-3 text-xs text-gray-600">
+              <p className="font-semibold text-gray-800">Share-ready in seconds.</p>
+              <p className="mt-1">This card is generated from your current profile data. No extra setup needed.</p>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-orange-50 p-4">
+                <PlayerShareCard player={player} scale={previewScale} />
+              </div>
+              <span className="text-xs text-gray-500">Uses your current profile info.</span>
+            </div>
+
+            {error && <p className="text-xs text-rose-600">{error}</p>}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-5 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-300 hover:bg-gray-50"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={downloading}
+            className="inline-flex items-center gap-2 rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {downloading ? 'Preparing…' : 'Download PNG'}
+          </button>
+        </div>
+
+        <div className="fixed left-[-9999px] top-0" aria-hidden="true">
+          <div ref={cardRef}>
+            <PlayerShareCard player={player} />
+          </div>
+        </div>
+      </aside>
+    </>,
+    document.body
+  )
+}
+
 function CoachBioSection({ initialBio, onSaved }) {
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(initialBio || '')
@@ -458,6 +610,7 @@ export default function Profile() {
   const [uploadingCover, setUploadingCover] = useState(false)
   const [avatarProgress, setAvatarProgress] = useState(null)
   const [coverProgress, setCoverProgress] = useState(null)
+  const [showShareCard, setShowShareCard] = useState(false)
   const avatarInputRef = useRef(null)
   const coverInputRef = useRef(null)
 
@@ -875,6 +1028,7 @@ export default function Profile() {
           verified={p.verificationStatus === 'verified'}
           onChangePhoto={triggerAvatarPicker}
           onChangeCover={triggerCoverPicker}
+          onShareCard={() => setShowShareCard(true)}
           photoUploading={uploadingAvatar}
           coverUploading={uploadingCover}
           photoProgress={avatarProgress}
@@ -1169,6 +1323,11 @@ export default function Profile() {
       <VerificationDialog
         open={showVerification}
         onClose={() => setShowVerification(false)}
+        player={player}
+      />
+      <ShareCardDrawer
+        open={showShareCard}
+        onClose={() => setShowShareCard(false)}
         player={player}
       />
       </>
