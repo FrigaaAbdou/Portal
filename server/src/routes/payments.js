@@ -96,12 +96,64 @@ router.get('/me', auth, async (req, res) => {
       .lean();
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    let synced = user;
+    if (user.stripeSubscriptionId || user.stripeCustomerId) {
+      let stripe = null;
+      try {
+        stripe = getStripeClient();
+      } catch (err) {
+        stripe = null;
+      }
+
+      if (stripe) {
+        let subscription = null;
+
+        if (user.stripeSubscriptionId) {
+          try {
+            subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          } catch (err) {
+            console.warn('Stripe subscription fetch failed', err?.message || err);
+          }
+        }
+
+        if (!subscription && user.stripeCustomerId) {
+          try {
+            const list = await stripe.subscriptions.list({
+              customer: user.stripeCustomerId,
+              status: 'all',
+              limit: 10,
+            });
+            if (list?.data?.length) {
+              subscription =
+                list.data.find((sub) => ['active', 'trialing'].includes(sub.status)) || list.data[0];
+            }
+          } catch (err) {
+            console.warn('Stripe customer subscription list failed', err?.message || err);
+          }
+        }
+
+        if (subscription) {
+          await updateUserSubscription(user._id, subscription);
+          synced = {
+            ...user,
+            stripeCustomerId: subscription.customer || user.stripeCustomerId,
+            stripeSubscriptionId: subscription.id || user.stripeSubscriptionId,
+            subscriptionStatus: subscription.status || user.subscriptionStatus,
+            subscriptionCurrentPeriodEnd: subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000)
+              : user.subscriptionCurrentPeriodEnd,
+            subscriptionPriceId: subscription.items?.data?.[0]?.price?.id || user.subscriptionPriceId,
+          };
+        }
+      }
+    }
+
     res.json({
-      status: user.subscriptionStatus || 'none',
-      currentPeriodEnd: user.subscriptionCurrentPeriodEnd || null,
-      priceId: user.subscriptionPriceId || null,
-      stripeCustomerId: user.stripeCustomerId || null,
-      stripeSubscriptionId: user.stripeSubscriptionId || null,
+      status: synced.subscriptionStatus || 'none',
+      currentPeriodEnd: synced.subscriptionCurrentPeriodEnd || null,
+      priceId: synced.subscriptionPriceId || null,
+      stripeCustomerId: synced.stripeCustomerId || null,
+      stripeSubscriptionId: synced.stripeSubscriptionId || null,
     });
   } catch (err) {
     console.error('Stripe subscription lookup error', err);

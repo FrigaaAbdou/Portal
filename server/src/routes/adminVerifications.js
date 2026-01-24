@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 
     const [items, total] = await Promise.all([
       PlayerProfile.find(filter)
-        .select('fullName school division jucoCoach verification status updatedAt verification.status verification.phone.verifiedAt phoneVerifiedAt')
+        .select('fullName school division jucoCoach verificationStatus verificationNote updatedAt verification.status verification.updatedAt verification.phone.verifiedAt phoneVerifiedAt')
         .skip(skip)
         .limit(safeLimit)
         .sort({ 'verification.updatedAt': -1 }),
@@ -74,6 +74,8 @@ router.post('/:id/approve', async (req, res) => {
     profile.verification.stats.reviewerNote = req.body.note || '';
     profile.verification.stats.verifiedAt = new Date();
     profile.verification.updatedAt = new Date();
+    profile.verificationStatus = 'verified';
+    profile.verificationNote = req.body.note || '';
     profile.verification.history = profile.verification.history || [];
     profile.verification.history.push({
       status: 'verified',
@@ -114,6 +116,8 @@ router.post('/:id/reject', async (req, res) => {
     profile.verification.stats.reviewerId = req.user.id;
     profile.verification.stats.reviewerNote = note;
     profile.verification.updatedAt = new Date();
+    profile.verificationStatus = 'rejected';
+    profile.verificationNote = note;
     profile.verification.history = profile.verification.history || [];
     profile.verification.history.push({
       status: 'needs_updates',

@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 dotenv.config();
 
 const { paymentsRouter, handleStripeWebhook } = require('./routes/payments');
+const uploadsRouter = require('./routes/uploads');
 const seedAdmin = require('./utils/seedAdmin');
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api/admin/announcements', require('./routes/adminAnnouncements'));
 app.use('/api/admin/finance', require('./routes/adminFinance'));
 app.use('/api/admin/users', require('./routes/adminUsers'));
 app.use('/api/payments', paymentsRouter);
+app.use('/api/uploads', uploadsRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
