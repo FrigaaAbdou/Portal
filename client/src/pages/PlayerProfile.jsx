@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ShieldCheck } from 'lucide-react'
 import AccountLayout from '../components/layout/AccountLayout'
 import { usePlayerProfile } from '../hooks/usePlayerProfile'
 import { fetchFavorites, removeFavorite, saveFavorite } from '../lib/api'
@@ -78,6 +79,7 @@ export default function PlayerProfile() {
   }
 
   const headerTitle = useMemo(() => profile?.fullName || 'Player profile', [profile?.fullName])
+  const isVerified = profile?.verificationStatus === 'verified'
 
   const heightText = useMemo(() => {
     if (!profile) return ''
@@ -187,7 +189,15 @@ export default function PlayerProfile() {
               {(profile.fullName || 'Player').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'PL'}
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">{profile.fullName || 'Unnamed Player'}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-semibold text-gray-900">{profile.fullName || 'Unnamed Player'}</h1>
+                {isVerified && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
+                    <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                    Verified
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-600">{[profile.city, profile.state, profile.country].filter(Boolean).join(', ') || 'Location not specified'}</p>
               <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
                 {profile.school && <span>School: <span className="font-semibold text-gray-800">{profile.school}</span></span>}

@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
+import { ShieldCheck } from 'lucide-react'
 import AccountLayout from '../components/layout/AccountLayout'
 import { getMyPlayerProfile, getMyCoachProfile, savePlayerProfile, saveCoachProfile, listMyJucoPlayers } from '../lib/api'
 import { notify } from '../lib/notify'
@@ -67,9 +68,14 @@ function StatusBadge({ status = 'none' }) {
     none: { label: 'Not verified', className: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
   }
   const { label, className, dot } = config[status] || config.none
+  const isVerified = status === 'verified'
   return (
     <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${className}`}>
-      <span className={`h-2 w-2 rounded-full ${dot}`} />
+      {isVerified ? (
+        <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <span className={`h-2 w-2 rounded-full ${dot}`} />
+      )}
       {label}
     </span>
   )
@@ -82,7 +88,7 @@ function initialsFrom(text = '') {
   return (a + b).toUpperCase() || 'U'
 }
 
-function HeaderPanel({ name, subtitle, coverUrl, avatarUrl, fallbackInitials, role }) {
+function HeaderPanel({ name, subtitle, coverUrl, avatarUrl, fallbackInitials, role, verified = false }) {
   return (
     <section className="relative mb-10 overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-orange-50 via-white to-emerald-50 shadow-sm">
       {/* Cover panel */}
@@ -108,7 +114,16 @@ function HeaderPanel({ name, subtitle, coverUrl, avatarUrl, fallbackInitials, ro
             <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
               {role && <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-600 shadow-sm">{role}</span>}
             </div>
-            <h2 className="mt-2 text-2xl font-semibold leading-tight text-gray-900 md:text-3xl">{name}</h2>
+            <div className="mt-2 flex flex-wrap items-center justify-center md:justify-start">
+              <div className="relative inline-flex items-center">
+                {verified && (
+                  <span className="absolute -left-20 top-1/2 -translate-y-1/2 text-[#ff5e00]" aria-label="Verified profile">
+                    <ShieldCheck className="h-16 w-16" aria-hidden="true" />
+                  </span>
+                )}
+                <h2 className="text-2xl font-semibold leading-tight text-gray-900 md:text-3xl">{name}</h2>
+              </div>
+            </div>
             {subtitle && <p className="mt-1 text-sm text-gray-600">{subtitle}</p>}
           </div>
           <div className="flex gap-2 text-xs">
@@ -730,6 +745,7 @@ export default function Profile() {
           avatarUrl={p.avatarUrl}
           fallbackInitials={initialsFrom(p.fullName || 'Player')}
           role="Player"
+          verified={p.verificationStatus === 'verified'}
         />
         <div className="space-y-8">
           <SectionCard

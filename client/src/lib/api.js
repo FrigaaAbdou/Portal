@@ -153,6 +153,21 @@ export async function listAdminVerifications(params = {}) {
   return apiFetch(`/admin/verifications${query ? `?${query}` : ''}`, { auth: true, toast: 'session' })
 }
 
+export async function getAdminVerification(id) {
+  if (!id) throw new Error('Verification id is required')
+  return apiFetch(`/admin/verifications/${id}`, { auth: true, toast: 'session' })
+}
+
+export async function approveAdminVerification(id, note = '') {
+  if (!id) throw new Error('Verification id is required')
+  return apiFetch(`/admin/verifications/${id}/approve`, { method: 'POST', body: { note }, auth: true, toast: 'session' })
+}
+
+export async function rejectAdminVerification(id, note) {
+  if (!id) throw new Error('Verification id is required')
+  return apiFetch(`/admin/verifications/${id}/reject`, { method: 'POST', body: { note }, auth: true, toast: 'session' })
+}
+
 export async function listAdminInvites() {
   return apiFetch('/admin/invites', { auth: true, toast: 'session' })
 }

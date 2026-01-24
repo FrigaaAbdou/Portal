@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
+import { ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AccountLayout from '../components/layout/AccountLayout'
 import { searchPlayers, fetchFavorites, saveFavorite, removeFavorite } from '../lib/api'
@@ -449,6 +450,12 @@ export default function PlayersDirectory() {
                           {classBadge(player) && (
                             <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">
                               {classBadge(player)}
+                            </span>
+                          )}
+                          {player.verificationStatus === 'verified' && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-700">
+                              <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                              Verified
                             </span>
                           )}
                           {(() => {
