@@ -93,6 +93,70 @@ export async function saveCoachProfile(payload) {
   return apiFetch('/coaches', { method: 'POST', body: payload, auth: true, toast: 'session' })
 }
 
+export async function requestUploadUrl({ kind, contentType, size }) {
+  return apiFetch('/uploads/presign', {
+    method: 'POST',
+    body: { kind, contentType, size },
+    auth: true,
+    toast: 'session',
+  })
+}
+
+function putFileWithProgress(uploadUrl, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', uploadUrl)
+    xhr.setRequestHeader('Content-Type', file.type)
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return
+      const percent = Math.round((event.loaded / event.total) * 100)
+      onProgress(percent)
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve()
+      } else {
+        reject(new Error(`Upload failed (HTTP ${xhr.status})`))
+      }
+    }
+    xhr.onerror = () => reject(new Error('Upload failed (network error)'))
+    xhr.send(file)
+  })
+}
+
+export async function uploadToR2(file, kind, options = {}) {
+  if (!file) throw new Error('File is required')
+  if (!file.type) throw new Error('File type is required')
+
+  const { uploadUrl, publicUrl } = await requestUploadUrl({
+    kind,
+    contentType: file.type,
+    size: file.size,
+  })
+
+  if (!uploadUrl || !publicUrl) {
+    throw new Error('Failed to get upload URL')
+  }
+
+  const onProgress = typeof options.onProgress === 'function' ? options.onProgress : null
+  if (onProgress) {
+    onProgress(0)
+    await putFileWithProgress(uploadUrl, file, onProgress)
+  } else {
+    const res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file,
+    })
+
+    if (!res.ok) {
+      throw new Error(`Upload failed (HTTP ${res.status})`)
+    }
+  }
+
+  return publicUrl
+}
+
 export async function getMyPlayerProfile() {
   return apiFetch('/players/me', { auth: true, toast: 'session' })
 }

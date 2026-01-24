@@ -177,10 +177,10 @@ export default function Pricing() {
             <h2 className="text-2xl font-semibold text-gray-900">You already have an active subscription</h2>
             <p className="mt-2 text-sm text-gray-700">Manage your billing preferences anytime from settings.</p>
             <Link
-              to="/settings"
+              to="/billing"
               className="mt-6 inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
             >
-              Go to settings
+              Go to billing
             </Link>
           </div>
         ) : (

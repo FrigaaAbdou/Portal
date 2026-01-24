@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AdjustmentsHorizontalIcon,
@@ -12,7 +12,14 @@ import {
 } from '@heroicons/react/24/outline'
 import { ShieldCheck } from 'lucide-react'
 import AccountLayout from '../components/layout/AccountLayout'
-import { getMyPlayerProfile, getMyCoachProfile, savePlayerProfile, saveCoachProfile, listMyJucoPlayers } from '../lib/api'
+import {
+  getMyPlayerProfile,
+  getMyCoachProfile,
+  savePlayerProfile,
+  saveCoachProfile,
+  listMyJucoPlayers,
+  uploadToR2,
+} from '../lib/api'
 import { notify } from '../lib/notify'
 import VerificationDialog from '../components/verification/VerificationDialog'
 
@@ -88,7 +95,21 @@ function initialsFrom(text = '') {
   return (a + b).toUpperCase() || 'U'
 }
 
-function HeaderPanel({ name, subtitle, coverUrl, avatarUrl, fallbackInitials, role, verified = false }) {
+function HeaderPanel({
+  name,
+  subtitle,
+  coverUrl,
+  avatarUrl,
+  fallbackInitials,
+  role,
+  verified = false,
+  onChangePhoto,
+  onChangeCover,
+  photoUploading = false,
+  coverUploading = false,
+  photoProgress,
+  coverProgress,
+}) {
   return (
     <section className="relative mb-10 overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-orange-50 via-white to-emerald-50 shadow-sm">
       {/* Cover panel */}
@@ -126,10 +147,30 @@ function HeaderPanel({ name, subtitle, coverUrl, avatarUrl, fallbackInitials, ro
             </div>
             {subtitle && <p className="mt-1 text-sm text-gray-600">{subtitle}</p>}
           </div>
-          <div className="flex gap-2 text-xs">
-            <button type="button" className="rounded-md border border-orange-200 bg-white px-3 py-1.5 font-medium text-orange-600 shadow-sm transition hover:border-orange-300 hover:bg-orange-50">Change Photo</button>
-            <button type="button" className="rounded-md border border-emerald-200 bg-white px-3 py-1.5 font-medium text-emerald-600 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50">Change Cover</button>
-          </div>
+          {(onChangePhoto || onChangeCover) && (
+            <div className="flex gap-2 text-xs">
+              {onChangePhoto && (
+                <button
+                  type="button"
+                  onClick={onChangePhoto}
+                  disabled={photoUploading}
+                  className="rounded-md border border-orange-200 bg-white px-3 py-1.5 font-medium text-orange-600 shadow-sm transition hover:border-orange-300 hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {photoUploading ? `Uploading…${typeof photoProgress === 'number' ? ` ${photoProgress}%` : ''}` : 'Change Photo'}
+                </button>
+              )}
+              {onChangeCover && (
+                <button
+                  type="button"
+                  onClick={onChangeCover}
+                  disabled={coverUploading}
+                  className="rounded-md border border-emerald-200 bg-white px-3 py-1.5 font-medium text-emerald-600 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {coverUploading ? `Uploading…${typeof coverProgress === 'number' ? ` ${coverProgress}%` : ''}` : 'Change Cover'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -255,8 +296,8 @@ function HighlightsSection({ urls, onSaved }) {
     return (
       <SectionCard title="Highlights" subtitle="Share your best clips or showcase reels." icon={PlayCircleIcon}>
         <ul className="space-y-2">
-          {list.map((url) => (
-            <li key={url} className="flex items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50/70 px-3 py-2">
+          {list.map((url, idx) => (
+            <li key={`${url}-${idx}`} className="flex items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50/70 px-3 py-2">
               <a className="truncate font-medium text-orange-600 hover:underline" href={url} target="_blank" rel="noreferrer">{url}</a>
               <button onClick={() => removeUrl(url)} className="rounded-md border border-orange-200 bg-white px-2 py-1 text-xs font-medium text-orange-600 transition hover:border-orange-300 hover:bg-orange-50">Remove</button>
             </li>
@@ -413,6 +454,12 @@ export default function Profile() {
   const [rosterMeta, setRosterMeta] = useState({ page: 1, totalPages: 1, total: 0, limit: 5 })
   const [rosterLoading, setRosterLoading] = useState(false)
   const [rosterError, setRosterError] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [avatarProgress, setAvatarProgress] = useState(null)
+  const [coverProgress, setCoverProgress] = useState(null)
+  const avatarInputRef = useRef(null)
+  const coverInputRef = useRef(null)
 
   useEffect(() => {
     let mounted = true
@@ -735,9 +782,89 @@ export default function Profile() {
         setSavingPrefs(false)
       }
     }
+
+    const triggerAvatarPicker = () => {
+      if (uploadingAvatar) return
+      avatarInputRef.current?.click()
+    }
+
+    const triggerCoverPicker = () => {
+      if (uploadingCover) return
+      coverInputRef.current?.click()
+    }
+
+    const validateImage = (file, kind) => {
+      const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
+      if (!allowedTypes.has(file.type)) {
+        notify.warning('Only JPG, PNG, or WebP images are supported.')
+        return false
+      }
+      const maxBytes = kind === 'avatar' ? 2 * 1024 * 1024 : 6 * 1024 * 1024
+      if (file.size > maxBytes) {
+        const maxMb = Math.round(maxBytes / (1024 * 1024))
+        notify.warning(`File is too large. Max ${maxMb}MB.`)
+        return false
+      }
+      return true
+    }
+
+    const handleAvatarSelected = async (event) => {
+      const file = event.target.files?.[0]
+      event.target.value = ''
+      if (!file) return
+      if (!validateImage(file, 'avatar')) return
+      setUploadingAvatar(true)
+      setAvatarProgress(0)
+      try {
+        const url = await uploadToR2(file, 'avatar', { onProgress: setAvatarProgress })
+        const updated = await savePlayerProfile({ avatarUrl: url })
+        setPlayer((prev) => updated || (prev ? { ...prev, avatarUrl: url } : prev))
+        notify.success('Avatar updated')
+      } catch (e) {
+        notify.warning(e?.message || 'Failed to upload avatar')
+      } finally {
+        setUploadingAvatar(false)
+        setAvatarProgress(null)
+      }
+    }
+
+    const handleCoverSelected = async (event) => {
+      const file = event.target.files?.[0]
+      event.target.value = ''
+      if (!file) return
+      if (!validateImage(file, 'cover')) return
+      setUploadingCover(true)
+      setCoverProgress(0)
+      try {
+        const url = await uploadToR2(file, 'cover', { onProgress: setCoverProgress })
+        const updated = await savePlayerProfile({ coverUrl: url })
+        setPlayer((prev) => updated || (prev ? { ...prev, coverUrl: url } : prev))
+        notify.success('Cover updated')
+      } catch (e) {
+        notify.warning(e?.message || 'Failed to upload cover')
+      } finally {
+        setUploadingCover(false)
+        setCoverProgress(null)
+      }
+    }
+
     return (
       <>
       <AccountLayout title={title}>
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleAvatarSelected}
+          className="hidden"
+        />
+        <input
+          ref={coverInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleCoverSelected}
+          className="hidden"
+        />
         <HeaderPanel
           name={p.fullName || 'Player'}
           subtitle={[p.city, p.state].filter(Boolean).join(', ')}
@@ -746,6 +873,12 @@ export default function Profile() {
           fallbackInitials={initialsFrom(p.fullName || 'Player')}
           role="Player"
           verified={p.verificationStatus === 'verified'}
+          onChangePhoto={triggerAvatarPicker}
+          onChangeCover={triggerCoverPicker}
+          photoUploading={uploadingAvatar}
+          coverUploading={uploadingCover}
+          photoProgress={avatarProgress}
+          coverProgress={coverProgress}
         />
         <div className="space-y-8">
           <SectionCard

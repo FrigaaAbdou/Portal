@@ -142,6 +142,7 @@ export default function AccountLayout({ title, children }) {
 
     items.push({ label: 'divider-personal', isDivider: true })
     items.push({ label: 'Settings', to: '/settings', icon: 'settings' })
+    items.push({ label: 'Billing', to: '/billing', icon: 'billing' })
     return items
   }, [isJucoCoach, isRecruiter, isAdmin])
 
